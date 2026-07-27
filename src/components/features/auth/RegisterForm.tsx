@@ -1,39 +1,33 @@
 'use client';
 
-import DatePickerInput from '@/components/shared/DatePickerInput';
 import { Button } from '@/components/ui/button';
 import {
   Field,
   FieldError,
   FieldGroup,
-  FieldLabel
+  FieldLabel,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';
 import { registerAction } from '@/lib/actions/auth.action';
 import { RegisterInput, registerSchema } from '@/lib/schemas/auth.schema';
-import { capitalizeFirstCha } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useTransition } from 'react';
+import { ArrowRight, Eye, EyeOff } from 'lucide-react';
+import { useState, useTransition } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
 export default function RegisterForm() {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const { control, handleSubmit, setError } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
       firstName: '',
       lastName: '',
-      dob: undefined,
-      gender: undefined,
       email: '',
-      password: ''
-    }
+      password: '',
+      confirmPassword: '',
+    },
   });
 
   const [isPending, startTransition] = useTransition();
@@ -49,17 +43,25 @@ export default function RegisterForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <FieldGroup className="gap-4">
-        <div className="grid grid-cols-2 gap-4">
+      <FieldGroup className='gap-6'>
+        <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
           {/* First name */}
           <Controller
             control={control}
-            name="firstName"
+            name='firstName'
             render={({ field, fieldState }) => (
-              <Field className="gap-1" data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>First name</FieldLabel>
+              <Field className='gap-2' data-invalid={fieldState.invalid}>
+                <FieldLabel
+                  htmlFor={field.name}
+                  className='flex items-center gap-2 text-on-surface'
+                >
+                  <span className='material-symbols-outlined text-sm'>
+                    person
+                  </span>
+                  ชื่อจริง (First Name)
+                </FieldLabel>
                 <Input
-                  placeholder="First name"
+                  placeholder='Firstname'
                   id={field.name}
                   {...field}
                   aria-invalid={fieldState.invalid}
@@ -73,12 +75,20 @@ export default function RegisterForm() {
           {/* Last name */}
           <Controller
             control={control}
-            name="lastName"
+            name='lastName'
             render={({ field, fieldState }) => (
-              <Field className="gap-1" data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Last name</FieldLabel>
+              <Field className='gap-2' data-invalid={fieldState.invalid}>
+                <FieldLabel
+                  htmlFor={field.name}
+                  className='flex items-center gap-2 text-on-surface'
+                >
+                  <span className='material-symbols-outlined text-sm'>
+                    person
+                  </span>
+                  นามสกุล (Last Name)
+                </FieldLabel>
                 <Input
-                  placeholder="Last name"
+                  placeholder='Lastname'
                   id={field.name}
                   {...field}
                   aria-invalid={fieldState.invalid}
@@ -90,94 +100,131 @@ export default function RegisterForm() {
             )}
           />
         </div>
-        {/* Date of birth */}
+        {/* Email */}
         <Controller
           control={control}
-          name="dob"
+          name='email'
           render={({ field, fieldState }) => (
-            <Field className="gap-1" data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor={field.name}>Date of birth</FieldLabel>
-              <DatePickerInput
-                id={field.name}
-                isInValid={fieldState.invalid}
-                value={field.value}
-                onValueChange={field.onChange}
-              />
-            </Field>
-          )}
-        />
-        {/* Gender */}
-        <Controller
-          control={control}
-          name="gender"
-          render={({ field, fieldState }) => (
-            <Field className="gap-1" data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor={field.name}>Gender</FieldLabel>
-              <Select
-                name={field.name}
-                value={capitalizeFirstCha(field.value) ?? ''}
-                onValueChange={field.onChange}
+            <Field className='gap-2' data-invalid={fieldState.invalid}>
+              <FieldLabel
+                htmlFor={field.name}
+                className='flex items-center gap-2 text-on-surface'
               >
-                <SelectTrigger
-                  id={field.name}
-                  aria-invalid={fieldState.invalid}
+                <span className='material-symbols-outlined text-sm'>mail</span>
+                อีเมล (Email)
+              </FieldLabel>
+              <Input
+                type='email'
+                placeholder='example@skyline.com'
+                id={field.name}
+                {...field}
+                aria-invalid={fieldState.invalid}
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+        <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
+          {/* Password */}
+          <Controller
+            control={control}
+            name='password'
+            render={({ field, fieldState }) => (
+              <Field className='gap-2' data-invalid={fieldState.invalid}>
+                <FieldLabel
+                  htmlFor={field.name}
+                  className='flex items-center gap-2 text-on-surface'
                 >
-                  <SelectValue placeholder="Select gender" />
-                </SelectTrigger>
-                <SelectContent alignItemWithTrigger={false}>
-                  <SelectItem value="FEMALE">Female</SelectItem>
-                  <SelectItem value="MALE">Male</SelectItem>
-                  <SelectItem value="OTHER">Other</SelectItem>
-                </SelectContent>
-              </Select>
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
-        {/* Eamil address */}
-        <Controller
-          control={control}
-          name="email"
-          render={({ field, fieldState }) => (
-            <Field className="gap-1" data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor={field.name}>Email address</FieldLabel>
-              <Input
-                type="email"
-                placeholder="a@mail.com"
-                id={field.name}
-                {...field}
-                aria-invalid={fieldState.invalid}
-              />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
-        {/* Password */}
-        <Controller
-          control={control}
-          name="password"
-          render={({ field, fieldState }) => (
-            <Field className="gap-1" data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-              <Input
-                placeholder="••••••••"
-                type="password"
-                id={field.name}
-                {...field}
-                aria-invalid={fieldState.invalid}
-              />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
+                  <span className='material-symbols-outlined text-sm'>
+                    lock
+                  </span>
+                  รหัสผ่าน (Password)
+                </FieldLabel>
+                <div className='relative'>
+                  <Input
+                    placeholder='••••••••'
+                    type={showPassword ? 'text' : 'password'}
+                    id={field.name}
+                    {...field}
+                    aria-invalid={fieldState.invalid}
+                    className='pr-10'
+                  />
+                  <button
+                    type='button'
+                    tabIndex={-1}
+                    onClick={() => setShowPassword((v) => !v)}
+                    aria-label={showPassword ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน'}
+                    className='absolute top-1/2 right-2.5 -translate-y-1/2 text-outline hover:text-on-surface'
+                  >
+                    {showPassword ? (
+                      <EyeOff className='size-4' />
+                    ) : (
+                      <Eye className='size-4' />
+                    )}
+                  </button>
+                </div>
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+          {/* Confirm password */}
+          <Controller
+            control={control}
+            name='confirmPassword'
+            render={({ field, fieldState }) => (
+              <Field className='gap-2' data-invalid={fieldState.invalid}>
+                <FieldLabel
+                  htmlFor={field.name}
+                  className='flex items-center gap-2 text-on-surface'
+                >
+                  <span className='material-symbols-outlined text-sm'>
+                    verified_user
+                  </span>
+                  ยืนยันรหัสผ่าน (Confirm)
+                </FieldLabel>
+                <div className='relative'>
+                  <Input
+                    placeholder='••••••••'
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    id={field.name}
+                    {...field}
+                    aria-invalid={fieldState.invalid}
+                    className='pr-10'
+                  />
+                  <button
+                    type='button'
+                    tabIndex={-1}
+                    onClick={() => setShowConfirmPassword((v) => !v)}
+                    aria-label={
+                      showConfirmPassword ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน'
+                    }
+                    className='absolute top-1/2 right-2.5 -translate-y-1/2 text-outline hover:text-on-surface'
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className='size-4' />
+                    ) : (
+                      <Eye className='size-4' />
+                    )}
+                  </button>
+                </div>
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+        </div>
         {/* Submit button */}
-        <Field>
+        <Field className='pt-2'>
           <Button
-            type="submit"
-            className="rounded-full py-5"
+            type='submit'
+            className='group h-auto justify-center gap-3 rounded-lg py-4 text-base font-semibold'
             disabled={isPending}
           >
-            {isPending ? 'Creating account ...' : 'Submit'}
+            {isPending ? 'กำลังสร้างบัญชี...' : 'ลงทะเบียน'}
+            <ArrowRight className='transition-transform group-hover:translate-x-1' />
           </Button>
         </Field>
       </FieldGroup>

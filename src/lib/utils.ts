@@ -10,3 +10,9 @@ export function capitalizeFirstCha(input?: string) {
     input && `${input.charAt(0).toUpperCase()}${input.slice(1).toLowerCase()}`
   );
 }
+
+export function toDownloadUrl(imageUrl: string) {
+  return imageUrl.includes('/upload/')
+    ? imageUrl.replace('/upload/', '/upload/fl_attachment/')
+    : imageUrl;
+}

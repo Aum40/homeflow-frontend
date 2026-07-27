@@ -1,6 +1,12 @@
-import { Noto_Sans } from 'next/font/google';
+import { Hanken_Grotesk, JetBrains_Mono } from 'next/font/google';
 
-export const notoSans = Noto_Sans({
+export const hankenGrotesk = Hanken_Grotesk({
   subsets: ['latin'],
   variable: '--font-sans'
+});
+
+export const jetBrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['500'],
+  variable: '--font-mono'
 });

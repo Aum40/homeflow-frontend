@@ -1,24 +1,26 @@
-import { Avatar, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import AvatarUploadDialog from './AvatarUploadDialog';
-import { RelationshipStatus } from '@/lib/api/api.type';
 
 type ProfileAvatarProps = {
+  firstName?: string;
+  lastName?: string;
   avatarUrl?: string | null;
-  relationshipStatus?: RelationshipStatus;
 };
 
 export default function ProfileAvatar({
-  avatarUrl,
-  relationshipStatus
+  firstName,
+  lastName,
+  avatarUrl
 }: ProfileAvatarProps) {
+  const initials = `${firstName?.[0] ?? ''}${lastName?.[0] ?? ''}`;
+
   return (
     <div className="relative">
       <Avatar className="size-42 border">
-        <AvatarImage src={avatarUrl ?? '/user.svg'} alt="User" />
+        <AvatarImage src={avatarUrl ?? undefined} alt="User" />
+        <AvatarFallback className="text-3xl">{initials}</AvatarFallback>
       </Avatar>
-      {relationshipStatus === 'SELF' && (
-        <AvatarUploadDialog avatarUrl={avatarUrl} />
-      )}
+      <AvatarUploadDialog avatarUrl={avatarUrl} />
     </div>
   );
 }

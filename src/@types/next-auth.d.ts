@@ -6,6 +6,7 @@ declare module 'next-auth' {
     id: string;
     firstName?: string;
     lastName?: string;
+    role?: 'ADMIN' | 'PROJECT_MANAGER' | 'CUSTOMER';
     access_token?: string;
     avatarUrl?: string | null;
   }
@@ -16,6 +17,7 @@ declare module 'next-auth/jwt' {
     sub: string;
     firstName?: string;
     lastName?: string;
+    role?: 'ADMIN' | 'PROJECT_MANAGER' | 'CUSTOMER';
     access_token?: string;
     avatarUrl?: string | null;
   }

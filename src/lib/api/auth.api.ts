@@ -1,6 +1,7 @@
 import { LoginInput, RegisterInput } from '../schemas/auth.schema';
 import { apiFetch } from './api-fetch';
-import { LoginResponse } from './api.type';
+import { authFetch } from './auth-fetch';
+import { LoginResponse, UserResponse } from './api.type';
 
 export const AuthApi = {
   register(data: RegisterInput) {
@@ -15,5 +16,9 @@ export const AuthApi = {
       method: 'POST',
       body: data
     });
+  },
+
+  getMe() {
+    return authFetch<UserResponse>('/auth/me');
   }
 };

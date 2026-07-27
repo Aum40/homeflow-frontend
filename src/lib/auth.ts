@@ -24,6 +24,7 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
         token.sub = user.id;
         token.firstName = user.firstName;
         token.lastName = user.lastName;
+        token.role = user.role;
         token.access_token = user.access_token;
         token.avatarUrl = user.avatarUrl;
       }
@@ -37,6 +38,7 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
     session({ token, session }) {
       session.user.firstName = token.firstName;
       session.user.lastName = token.lastName;
+      session.user.role = token.role;
       session.user.avatarUrl = token.avatarUrl;
       session.user.access_token = token.access_token;
       session.user.id = token.sub;
