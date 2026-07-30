@@ -1,43 +1,39 @@
 import z from 'zod';
 
 export const createProjectSchema = z.object({
+  customerId: z
+    .string('Please select a customer.')
+    .min(1, 'Please select a customer.'),
+  houseDesignId: z
+    .string('Please select a house design.')
+    .min(1, 'Please select a house design.'),
   projectName: z
     .string('Project name must be a string.')
     .min(1, 'Project name is required.'),
-  houseType: z
-    .string('House type must be a string.')
-    .min(1, 'House type is required.'),
   location: z
     .string('Location must be a string.')
     .min(1, 'Location is required.'),
-  estimatedBudget: z
-    .number('Estimated budget must be a number.')
-    .positive('Estimated budget must be positive.'),
+  latitude: z.number().min(-90).max(90).optional(),
+  longitude: z.number().min(-180).max(180).optional(),
   description: z.string().optional()
 });
 
 export type CreateProjectInput = z.infer<typeof createProjectSchema>;
 
-export const addProjectMaterialSchema = z.object({
-  materialId: z.string('Material is required.').min(1, 'Material is required.'),
-  plannedQty: z
-    .number('Planned quantity must be a number.')
-    .int('Planned quantity must be an integer.')
-    .positive('Planned quantity must be positive.')
+export const updateProjectInfoSchema = z.object({
+  projectName: z
+    .string('Project name must be a string.')
+    .min(1, 'Project name is required.')
+    .optional(),
+  location: z
+    .string('Location must be a string.')
+    .min(1, 'Location is required.')
+    .optional(),
+  latitude: z.number().min(-90).max(90).optional(),
+  longitude: z.number().min(-180).max(180).optional()
 });
 
-export type AddProjectMaterialInput = z.infer<typeof addProjectMaterialSchema>;
-
-export const updateProjectMaterialSchema = z.object({
-  plannedQty: z
-    .number('Planned quantity must be a number.')
-    .int('Planned quantity must be an integer.')
-    .positive('Planned quantity must be positive.')
-});
-
-export type UpdateProjectMaterialInput = z.infer<
-  typeof updateProjectMaterialSchema
->;
+export type UpdateProjectInfoInput = z.infer<typeof updateProjectInfoSchema>;
 
 export const withdrawMaterialSchema = z.object({
   qty: z
@@ -63,3 +59,21 @@ export const updateChecklistItemSchema = z.object({
 export type UpdateChecklistItemInput = z.infer<
   typeof updateChecklistItemSchema
 >;
+
+export const updateProjectDatesSchema = z
+  .object({
+    startDate: z.string().optional(),
+    endDate: z.string().optional()
+  })
+  .refine(
+    (data) =>
+      !data.startDate ||
+      !data.endDate ||
+      new Date(data.endDate) >= new Date(data.startDate),
+    {
+      message: 'วันที่คาดว่าจะเสร็จต้องไม่ก่อนวันที่เริ่มต้น',
+      path: ['endDate']
+    }
+  );
+
+export type UpdateProjectDatesInput = z.infer<typeof updateProjectDatesSchema>;

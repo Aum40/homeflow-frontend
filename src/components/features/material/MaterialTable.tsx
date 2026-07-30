@@ -1,12 +1,11 @@
 'use client';
 
-import { Alert, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import { removeMaterialAction } from '@/lib/actions/material.action';
 import { MaterialResponse } from '@/lib/api/api.type';
-import { AlertCircle, Trash2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useState, useTransition } from 'react';
+import { Trash2 } from 'lucide-react';
+import ImageWithPlaceholder from '@/components/shared/ImageWithPlaceholder';
 import MaterialFormDialog from './MaterialFormDialog';
 
 function formatPrice(price: string) {
@@ -21,39 +20,8 @@ export default function MaterialTable({
 }: {
   materials: MaterialResponse[];
 }) {
-  const router = useRouter();
-  const [isPending, startTransition] = useTransition();
-  const [error, setError] = useState<string | null>(null);
-  const [pendingId, setPendingId] = useState<string | null>(null);
-
-  const handleDelete = (material: MaterialResponse) => {
-    if (!confirm(`ต้องการลบวัสดุ "${material.name}" ใช่หรือไม่?`)) return;
-
-    setPendingId(material.id);
-    startTransition(async () => {
-      setError(null);
-      const result = await removeMaterialAction(material.id);
-      if (result?.success === false) {
-        setError(result.message);
-      } else {
-        router.refresh();
-      }
-      setPendingId(null);
-    });
-  };
-
   return (
     <div className="flex flex-col gap-4">
-      {error && (
-        <Alert
-          variant="destructive"
-          className="border-destructive bg-destructive/15"
-        >
-          <AlertCircle />
-          <AlertTitle>{error}</AlertTitle>
-        </Alert>
-      )}
-
       <div className="flex justify-end">
         <MaterialFormDialog />
       </div>
@@ -62,6 +30,7 @@ export default function MaterialTable({
         <table className="w-full min-w-[720px] text-left text-sm">
           <thead className="bg-muted text-muted-foreground">
             <tr>
+              <th className="px-4 py-3 font-medium" />
               <th className="px-4 py-3 font-medium">ชื่อวัสดุ</th>
               <th className="px-4 py-3 font-medium">หมวดหมู่</th>
               <th className="px-4 py-3 font-medium">หน่วย</th>
@@ -72,7 +41,6 @@ export default function MaterialTable({
           </thead>
           <tbody>
             {materials.map((material) => {
-              const rowPending = isPending && pendingId === material.id;
               const lowStock = material.stock <= 10;
 
               return (
@@ -80,6 +48,13 @@ export default function MaterialTable({
                   key={material.id}
                   className="border-t border-border last:border-b-0"
                 >
+                  <td className="px-4 py-3">
+                    <ImageWithPlaceholder
+                      src={material.imageUrl}
+                      alt={material.name}
+                      className="size-20 rounded-md border border-border"
+                    />
+                  </td>
                   <td className="px-4 py-3">{material.name}</td>
                   <td className="px-4 py-3 text-muted-foreground">
                     {material.category}
@@ -100,15 +75,24 @@ export default function MaterialTable({
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1">
                       <MaterialFormDialog material={material} />
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        disabled={rowPending}
-                        aria-label="ลบวัสดุ"
-                        onClick={() => handleDelete(material)}
-                      >
-                        <Trash2 className="size-4 text-destructive" />
-                      </Button>
+                      <ConfirmDialog
+                        triggerRender={
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            aria-label="ลบวัสดุ"
+                          />
+                        }
+                        triggerContent={
+                          <Trash2 className="size-4 text-destructive" />
+                        }
+                        title="ยืนยันการลบวัสดุ"
+                        description={`ต้องการลบวัสดุ "${material.name}" ใช่หรือไม่? การลบไม่สามารถย้อนกลับได้`}
+                        confirmLabel="ลบวัสดุ"
+                        successMessage="ลบวัสดุเรียบร้อยแล้ว"
+                        destructive
+                        onConfirm={() => removeMaterialAction(material.id)}
+                      />
                     </div>
                   </td>
                 </tr>
@@ -117,7 +101,7 @@ export default function MaterialTable({
             {materials.length === 0 && (
               <tr>
                 <td
-                  colSpan={6}
+                  colSpan={7}
                   className="px-4 py-6 text-center text-muted-foreground"
                 >
                   ยังไม่มีวัสดุในระบบ

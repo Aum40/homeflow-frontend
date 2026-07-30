@@ -11,41 +11,48 @@ import {
 } from '@/components/ui/dialog';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { updateProjectMaterialAction } from '@/lib/actions/project.action';
-import { ProjectMaterialResponse } from '@/lib/api/api.type';
+import { updateProjectDatesAction } from '@/lib/actions/project.action';
 import {
-  UpdateProjectMaterialInput,
-  updateProjectMaterialSchema
+  UpdateProjectDatesInput,
+  updateProjectDatesSchema
 } from '@/lib/schemas/project.schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Pencil } from 'lucide-react';
 import { useState, useTransition } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
-export default function EditProjectMaterialDialog({
+function toDateInputValue(value: string | null) {
+  return value ? value.slice(0, 10) : '';
+}
+
+export default function EditProjectDatesDialog({
   projectId,
-  projectMaterial
+  startDate,
+  endDate
 }: {
   projectId: string;
-  projectMaterial: ProjectMaterialResponse;
+  startDate: string | null;
+  endDate: string | null;
 }) {
   const [open, setOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  const { control, handleSubmit } = useForm<UpdateProjectMaterialInput>({
-    resolver: zodResolver(updateProjectMaterialSchema),
-    defaultValues: { plannedQty: projectMaterial.plannedQty }
+  const { control, handleSubmit } = useForm<UpdateProjectDatesInput>({
+    resolver: zodResolver(updateProjectDatesSchema),
+    defaultValues: {
+      startDate: toDateInputValue(startDate),
+      endDate: toDateInputValue(endDate)
+    }
   });
 
-  const onSubmit = (data: UpdateProjectMaterialInput) => {
+  const onSubmit = (data: UpdateProjectDatesInput) => {
     setErrorMessage(null);
     startTransition(async () => {
-      const result = await updateProjectMaterialAction(
-        projectId,
-        projectMaterial.materialId,
-        data
-      );
+      const result = await updateProjectDatesAction(projectId, {
+        startDate: data.startDate || undefined,
+        endDate: data.endDate || undefined
+      });
       if (result?.success === false) {
         setErrorMessage(result.message);
         return;
@@ -63,31 +70,49 @@ export default function EditProjectMaterialDialog({
       }}
     >
       <DialogTrigger
-        render={<Button variant="ghost" size="icon-sm" aria-label="แก้ไขจำนวนที่วางแผน" />}
+        render={
+          <Button variant="outline" size="sm" className="whitespace-nowrap" />
+        }
       >
-        <Pencil className="size-4" />
+        <Pencil className="mr-1 size-4" />
+        แก้ไขวันที่
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>
-            แก้ไขจำนวนที่วางแผน: {projectMaterial.materialName}
-          </DialogTitle>
+          <DialogTitle>แก้ไขวันที่โครงการ</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
           <FieldGroup className="gap-4">
             <Controller
               control={control}
-              name="plannedQty"
+              name="startDate"
+              render={({ field, fieldState }) => (
+                <Field className="gap-1" data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor={field.name}>วันที่เริ่มต้น</FieldLabel>
+                  <Input
+                    type="date"
+                    id={field.name}
+                    {...field}
+                    aria-invalid={fieldState.invalid}
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+            <Controller
+              control={control}
+              name="endDate"
               render={({ field, fieldState }) => (
                 <Field className="gap-1" data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor={field.name}>
-                    จำนวนที่วางแผน ({projectMaterial.unit})
+                    วันที่คาดว่าจะเสร็จ
                   </FieldLabel>
                   <Input
-                    type="number"
+                    type="date"
                     id={field.name}
                     {...field}
-                    onChange={(e) => field.onChange(e.target.valueAsNumber)}
                     aria-invalid={fieldState.invalid}
                   />
                   {fieldState.invalid && (

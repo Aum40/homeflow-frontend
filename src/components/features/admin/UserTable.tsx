@@ -14,7 +14,7 @@ import {
   updateUserStatusAction
 } from '@/lib/actions/user.action';
 import { UserResponse, UserRole } from '@/lib/api/api.type';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
@@ -109,26 +109,31 @@ export default function UserTable({
                     {user.email}
                   </td>
                   <td className="px-4 py-3">
-                    <Select
-                      value={user.role}
-                      disabled={isSelf || rowPending}
-                      onValueChange={(value) =>
-                        handleRoleChange(user.id, value as UserRole)
-                      }
-                    >
-                      <SelectTrigger size="sm">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {(Object.keys(ROLE_LABELS) as UserRole[]).map(
-                          (role) => (
-                            <SelectItem key={role} value={role}>
-                              {ROLE_LABELS[role]}
-                            </SelectItem>
-                          )
-                        )}
-                      </SelectContent>
-                    </Select>
+                    <div className="flex items-center gap-2">
+                      <Select
+                        value={user.role}
+                        disabled={isSelf || rowPending}
+                        onValueChange={(value) =>
+                          handleRoleChange(user.id, value as UserRole)
+                        }
+                      >
+                        <SelectTrigger size="sm">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {(Object.keys(ROLE_LABELS) as UserRole[]).map(
+                            (role) => (
+                              <SelectItem key={role} value={role}>
+                                {ROLE_LABELS[role]}
+                              </SelectItem>
+                            )
+                          )}
+                        </SelectContent>
+                      </Select>
+                      {rowPending && (
+                        <Loader2 className="size-4 shrink-0 animate-spin text-muted-foreground" />
+                      )}
+                    </div>
                   </td>
                   <td className="px-4 py-3">
                     <span
@@ -150,6 +155,9 @@ export default function UserTable({
                         handleStatusToggle(user.id, !user.isActive)
                       }
                     >
+                      {rowPending && (
+                        <Loader2 className="mr-1 size-3.5 animate-spin" />
+                      )}
                       {user.isActive ? 'ปิดบัญชี' : 'เปิดบัญชี'}
                     </Button>
                   </td>

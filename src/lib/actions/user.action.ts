@@ -1,6 +1,5 @@
 'use server';
 
-import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { ApiError } from '../api/api-error';
 import { UserApi } from '../api/user.api';
@@ -111,7 +110,9 @@ export async function changePasswordAction(
   }
 }
 
-export async function uploadAvatar(file: File): Promise<ErrorActionResult> {
+export async function uploadAvatar(
+  file: File
+): Promise<ErrorActionResult | void> {
   try {
     const avatarUrl = await UserApi.uploadAvatar(file);
     await unstable_update({ user: { avatarUrl } });
@@ -125,5 +126,5 @@ export async function uploadAvatar(file: File): Promise<ErrorActionResult> {
     }
     throw error;
   }
-  redirect('/profile');
+  revalidatePath('/profile');
 }

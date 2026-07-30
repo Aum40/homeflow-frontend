@@ -1,18 +1,14 @@
 'use client';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import homeflowIcon from '@/app/icon.png';
 import { cn } from '@/lib/utils';
-import { logoutAction } from '@/lib/actions/auth.action';
 import {
   Boxes,
   Home,
+  House,
   LayoutDashboard,
-  LogOut,
   LucideIcon,
   Menu,
-  PlusCircle,
-  Settings,
   Users,
   X
 } from 'lucide-react';
@@ -44,6 +40,12 @@ function getNavItems(role?: string): NavItem[] {
         enabled: true
       },
       {
+        label: 'จัดการแบบบ้าน',
+        href: '/admin/house-designs',
+        icon: House,
+        enabled: true
+      },
+      {
         label: 'แดชบอร์ด',
         href: '/dashboard',
         icon: LayoutDashboard,
@@ -59,16 +61,9 @@ function getNavItems(role?: string): NavItem[] {
       href: '/dashboard',
       icon: LayoutDashboard,
       enabled: true
-    },
-    { label: 'ตั้งค่า', href: '#', icon: Settings, enabled: false }
+    }
   ];
 }
-
-const ROLE_LABELS: Record<string, string> = {
-  ADMIN: 'ผู้ดูแลระบบ',
-  PROJECT_MANAGER: 'ผู้จัดการโครงการ',
-  CUSTOMER: 'ลูกค้า'
-};
 
 function isNavItemActive(pathname: string, href: string) {
   if (href === '/') return pathname === '/';
@@ -130,10 +125,6 @@ function SidebarContent({
   };
   onNavigate?: () => void;
 }) {
-  const fullName = `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim();
-  const initials = `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`;
-  const roleLabel = user.role ? (ROLE_LABELS[user.role] ?? user.role) : '';
-
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center space-x-3 px-6 py-6">
@@ -149,47 +140,6 @@ function SidebarContent({
           role={user.role}
           onNavigate={onNavigate}
         />
-      </div>
-
-      <div className="space-y-4 border-t border-outline-variant/30 p-gutter-desktop">
-        {user.role === 'CUSTOMER' && (
-          <Link
-            href="/projects/new"
-            onClick={onNavigate}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-3 font-bold text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            <PlusCircle className="size-5" />
-            โครงการใหม่
-          </Link>
-        )}
-
-        <button
-          type="button"
-          onClick={() => logoutAction()}
-          className="flex w-full items-center gap-4 rounded px-2 py-2 text-left text-sm text-destructive transition-all hover:bg-destructive/10"
-        >
-          <LogOut className="size-4" />
-          ออกจากระบบ
-        </button>
-
-        <Link
-          href="/profile"
-          onClick={onNavigate}
-          className="flex items-center rounded-lg border-t border-outline-variant/30 pt-4 transition-colors hover:bg-surface-variant"
-        >
-          <Avatar size="lg" className="border-2 border-primary-fixed shadow-sm">
-            <AvatarImage src={user.avatarUrl ?? undefined} alt="Profile" />
-            <AvatarFallback>{initials}</AvatarFallback>
-          </Avatar>
-          <div className="ml-3 overflow-hidden">
-            <p className="truncate text-sm font-bold text-on-surface">
-              {fullName}
-            </p>
-            <p className="truncate text-[10px] text-on-surface-variant">
-              {roleLabel}
-            </p>
-          </div>
-        </Link>
       </div>
     </div>
   );

@@ -7,7 +7,9 @@ import {
   uploadChecklistItemPhotosAction
 } from '@/lib/actions/project.action';
 import { ChecklistItemResponse } from '@/lib/api/api.type';
-import { ImagePlus, Trash2 } from 'lucide-react';
+import ConfirmDialog from '@/components/shared/ConfirmDialog';
+import { checkUploadSize } from '@/lib/utils';
+import { ImagePlus, Loader2, Trash2 } from 'lucide-react';
 import { useRef, useState, useTransition } from 'react';
 import EditChecklistItemDialog from './EditChecklistItemDialog';
 import PhotoThumbnail from './PhotoThumbnail';
@@ -43,20 +45,16 @@ export default function ChecklistItemRow({
     });
   };
 
-  const handleDelete = () => {
-    if (!confirm(`ต้องการลบ "${item.title}" ใช่หรือไม่?`)) return;
-
-    setError(null);
-    startTransition(async () => {
-      const result = await removeChecklistItemAction(projectId, item.id);
-      if (result?.success === false) setError(result.message);
-    });
-  };
-
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length) return;
     const files = Array.from(e.target.files);
     e.target.value = '';
+
+    const sizeError = checkUploadSize(files);
+    if (sizeError) {
+      setError(sizeError);
+      return;
+    }
 
     setError(null);
     startTransition(async () => {
@@ -84,57 +82,58 @@ export default function ChecklistItemRow({
             <p
               className={
                 item.isCompleted
-                  ? 'font-bold text-on-surface-variant line-through'
+                  ? 'font-bold text-green-600 dark:text-green-400'
                   : 'font-bold text-on-surface'
               }
             >
               {item.title}
             </p>
-            {item.isCompleted && item.completedByName && item.completedAt && (
+            {item.isCompleted && item.completedByName && item.completedAt ? (
               <p className="text-xs text-on-surface-variant">
                 เสร็จโดย {item.completedByName} ·{' '}
                 {formatDateShort(item.completedAt)}
               </p>
+            ) : (
+              <span className="mt-1 inline-block rounded-full bg-secondary-container px-2 py-0.5 text-[10px] font-bold text-on-secondary-container uppercase">
+                กำลังดำเนินงาน
+              </span>
             )}
           </div>
         </label>
 
         {isManager && (
           <div className="flex shrink-0 items-center gap-1">
-            <input
-              ref={fileInputEl}
-              type="file"
-              accept="image/*"
-              multiple
-              className="hidden"
-              onChange={handlePhotoChange}
-            />
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              disabled={isPending}
-              aria-label="แนบรูปภาพ"
-              onClick={() => fileInputEl.current?.click()}
-            >
-              <ImagePlus className="size-4" />
-            </Button>
             <EditChecklistItemDialog projectId={projectId} item={item} />
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              disabled={isPending}
-              aria-label="ลบรายการ"
-              onClick={handleDelete}
-            >
-              <Trash2 className="size-4 text-destructive" />
-            </Button>
+            <ConfirmDialog
+              triggerRender={
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  disabled={isPending}
+                  aria-label="ลบรายการ"
+                />
+              }
+              triggerContent={
+                isPending ? (
+                  <Loader2 className="size-4 animate-spin text-muted-foreground" />
+                ) : (
+                  <Trash2 className="size-4 text-destructive" />
+                )
+              }
+              title="ยืนยันการลบรายการ"
+              description={`ต้องการลบ "${item.title}" ออกจากเช็คลิสต์ใช่หรือไม่? รูปภาพที่แนบไว้จะถูกลบไปด้วย`}
+              confirmLabel="ลบรายการ"
+              successMessage="ลบรายการเรียบร้อยแล้ว"
+              destructive
+              onConfirm={() => removeChecklistItemAction(projectId, item.id)}
+            />
           </div>
         )}
       </div>
 
       {error && <p className="text-xs text-destructive">{error}</p>}
 
-      {item.photos.length > 0 && (
+      {(item.photos.length > 0 || isManager) && (
         <div className="flex flex-wrap gap-2">
           {item.photos.map((photo) => (
             <PhotoThumbnail
@@ -144,6 +143,29 @@ export default function ChecklistItemRow({
               className="size-16 rounded-lg object-cover"
             />
           ))}
+          {isManager && (
+            <>
+              <input
+                ref={fileInputEl}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={handlePhotoChange}
+              />
+              <button
+                type="button"
+                disabled={isPending}
+                onClick={() => fileInputEl.current?.click()}
+                className="flex h-16 w-24 shrink-0 flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-outline-variant bg-surface-container text-on-surface-variant transition-all hover:border-primary hover:bg-surface-container-high disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <ImagePlus className="size-4 text-primary" />
+                <span className="text-[9px] leading-none font-medium">
+                  {isPending ? 'กำลังอัปโหลด...' : 'อัปโหลดภาพใหม่'}
+                </span>
+              </button>
+            </>
+          )}
         </div>
       )}
     </div>

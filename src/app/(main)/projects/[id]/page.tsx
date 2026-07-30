@@ -1,11 +1,17 @@
-import AcceptProjectButton from '@/components/features/project/AcceptProjectButton';
+import ImageWithPlaceholder from '@/components/shared/ImageWithPlaceholder';
+import InlineEditableText from '@/components/shared/InlineEditableText';
 import BudgetPanel from '@/components/features/project/BudgetPanel';
+import CloseProjectButton from '@/components/features/project/CloseProjectButton';
+import EditableProjectLocationMap from '@/components/features/project/EditableProjectLocationMap';
+import EditProjectDatesDialog from '@/components/features/project/EditProjectDatesDialog';
+import ProjectLocationMap from '@/components/features/project/ProjectLocationMap';
 import ProjectMaterialsSection from '@/components/features/project/ProjectMaterialsSection';
 import ProjectPhotosGallery from '@/components/features/project/ProjectPhotosGallery';
 import ProjectProgressRing from '@/components/features/project/ProjectProgressRing';
 import ProjectStagesCard from '@/components/features/project/ProjectStagesCard';
 import ProjectStatusBadge from '@/components/features/project/ProjectStatusBadge';
 import { ApiError } from '@/lib/api/api-error';
+import { updateProjectInfoAction } from '@/lib/actions/project.action';
 import { MaterialApi } from '@/lib/api/material.api';
 import { ProjectApi } from '@/lib/api/project.api';
 import { auth } from '@/lib/auth';
@@ -47,25 +53,31 @@ export default async function ProjectDetailPage({
     throw error;
   }
 
-  const canAccept =
-    session?.user?.role === 'PROJECT_MANAGER' &&
-    project.status === 'REQUESTED';
-
   const isManager =
     session?.user?.role === 'PROJECT_MANAGER' &&
     project.projectManagerId === session.user.id;
 
+  const canEditDates =
+    isManager &&
+    project.status !== 'COMPLETED' &&
+    project.status !== 'CANCELLED';
+
+  const canClose =
+    isManager &&
+    (project.status === 'PLANNING' || project.status === 'IN_PROGRESS');
+
   const showManagementSections = project.projectManagerId !== null;
 
-  const [materials, checklistItems, budget, catalog] =
+  const [materials, checklistItems, budget, catalog, withdrawals] =
     showManagementSections
       ? await Promise.all([
           ProjectApi.getMaterials(id),
           ProjectApi.getChecklist(id),
           ProjectApi.getBudget(id),
-          isManager ? MaterialApi.getAll() : Promise.resolve([])
+          isManager ? MaterialApi.getAll() : Promise.resolve([]),
+          ProjectApi.getWithdrawalHistory(id)
         ])
-      : [[], [], null, []];
+      : [[], [], null, [], []];
 
   const completedChecklistCount = checklistItems.filter(
     (item) => item.isCompleted
@@ -77,41 +89,118 @@ export default async function ProjectDetailPage({
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-on-background">
-            {project.projectName}
-          </h1>
-          <p className="text-sm text-on-surface-variant">
-            {project.houseType} · {project.location}
-          </p>
+        <div className="flex items-center gap-4">
+          <ImageWithPlaceholder
+            src={project.imageUrl ?? project.houseDesignImageUrl}
+            alt={project.houseType}
+            className="hidden size-16 shrink-0 rounded-lg border border-outline-variant sm:block"
+          />
+          <div>
+            <h1 className="text-2xl font-bold text-on-background">
+              {isManager ? (
+                <InlineEditableText
+                  value={project.projectName}
+                  inputClassName="text-2xl font-bold"
+                  onSave={async (value) => {
+                    'use server';
+                    const result = await updateProjectInfoAction(project.id, {
+                      projectName: value
+                    });
+                    if (result?.success === false) return result;
+                  }}
+                />
+              ) : (
+                project.projectName
+              )}
+            </h1>
+            <p className="text-sm text-on-surface-variant">
+              {project.houseType} ·{' '}
+              {isManager ? (
+                <InlineEditableText
+                  value={project.location}
+                  onSave={async (value) => {
+                    'use server';
+                    const result = await updateProjectInfoAction(project.id, {
+                      location: value
+                    });
+                    if (result?.success === false) return result;
+                  }}
+                />
+              ) : (
+                project.location
+              )}
+            </p>
+          </div>
         </div>
-        <ProjectStatusBadge status={project.status} />
+        <div className="flex items-center gap-3">
+          <ProjectStatusBadge status={project.status} />
+          {canClose && (
+            <CloseProjectButton
+              projectId={project.id}
+              progressPercent={project.progressPercent}
+            />
+          )}
+        </div>
       </div>
 
       {project.description && (
         <p className="text-on-surface-variant">{project.description}</p>
       )}
 
-      <div className="grid grid-cols-1 gap-6 rounded-xl border border-outline-variant bg-surface-container-lowest p-6 sm:grid-cols-2">
-        <DetailItem
-          label="วันที่เริ่มต้น"
-          value={project.startDate ? formatDate(project.startDate) : '-'}
+      {isManager ? (
+        <EditableProjectLocationMap
+          projectId={project.id}
+          latitude={project.latitude ? Number(project.latitude) : null}
+          longitude={project.longitude ? Number(project.longitude) : null}
         />
-        <DetailItem
-          label="วันที่คาดว่าจะเสร็จ"
-          value={project.endDate ? formatDate(project.endDate) : '-'}
-        />
-        <DetailItem
-          label="วันที่ส่งคำขอ"
-          value={formatDate(project.createdAt)}
-        />
-        <DetailItem
-          label="อัปเดตล่าสุด"
-          value={formatDate(project.updatedAt)}
-        />
-      </div>
+      ) : (
+        project.latitude !== null &&
+        project.longitude !== null && (
+          <ProjectLocationMap
+            latitude={Number(project.latitude)}
+            longitude={Number(project.longitude)}
+          />
+        )
+      )}
 
-      {canAccept && <AcceptProjectButton projectId={project.id} />}
+      <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-6">
+        {canEditDates && (
+          <div className="mb-4 flex justify-end">
+            <EditProjectDatesDialog
+              projectId={project.id}
+              startDate={project.startDate}
+              endDate={project.endDate}
+            />
+          </div>
+        )}
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <DetailItem
+            label="วันที่เริ่มต้น"
+            value={project.startDate ? formatDate(project.startDate) : '-'}
+          />
+          {project.status === 'COMPLETED' ? (
+            <DetailItem
+              label="วันที่ปิดโครงการ"
+              value={
+                project.completedAt ? formatDate(project.completedAt) : '-'
+              }
+            />
+          ) : (
+            <DetailItem
+              label="วันที่คาดว่าจะเสร็จ"
+              value={project.endDate ? formatDate(project.endDate) : '-'}
+            />
+          )}
+          <DetailItem
+            label="วันที่ส่งคำขอ"
+            value={formatDate(project.createdAt)}
+          />
+          <DetailItem
+            label="อัปเดตล่าสุด"
+            value={formatDate(project.updatedAt)}
+          />
+        </div>
+      </div>
 
       {showManagementSections && budget && (
         <>
@@ -135,6 +224,7 @@ export default async function ProjectDetailPage({
             projectId={project.id}
             materials={materials}
             catalog={catalog}
+            withdrawals={withdrawals}
             isManager={isManager}
           />
 

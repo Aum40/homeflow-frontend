@@ -1,38 +1,39 @@
-import { MaterialResponse, ProjectMaterialResponse } from '@/lib/api/api.type';
-import AddProjectMaterialForm from './AddProjectMaterialForm';
+import {
+  MaterialResponse,
+  MaterialWithdrawalResponse,
+  ProjectMaterialResponse
+} from '@/lib/api/api.type';
+import MaterialWithdrawalHistory from './MaterialWithdrawalHistory';
 import ProjectMaterialsTable from './ProjectMaterialsTable';
 
 export default function ProjectMaterialsSection({
   projectId,
   materials,
   catalog,
+  withdrawals,
   isManager
 }: {
   projectId: string;
   materials: ProjectMaterialResponse[];
   catalog: MaterialResponse[];
+  withdrawals: MaterialWithdrawalResponse[];
   isManager: boolean;
 }) {
-  const availableMaterials = catalog.filter(
-    (material) => !materials.some((pm) => pm.materialId === material.id)
-  );
-
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-outline-variant bg-surface-container-lowest p-6">
-      <h2 className="text-lg font-bold text-on-background">วัสดุที่ใช้ในโครงการ</h2>
-
-      {isManager && (
-        <AddProjectMaterialForm
+    <div className="flex flex-col gap-6 rounded-xl border border-outline-variant bg-surface-container-lowest p-6">
+      <div className="flex flex-col gap-4">
+        <h2 className="text-lg font-bold text-on-background">
+          วัสดุที่ใช้ในโครงการ
+        </h2>
+        <ProjectMaterialsTable
           projectId={projectId}
-          availableMaterials={availableMaterials}
+          materials={materials}
+          catalog={catalog}
+          isManager={isManager}
         />
-      )}
+      </div>
 
-      <ProjectMaterialsTable
-        projectId={projectId}
-        materials={materials}
-        isManager={isManager}
-      />
+      <MaterialWithdrawalHistory withdrawals={withdrawals} />
     </div>
   );
 }

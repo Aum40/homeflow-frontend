@@ -13,7 +13,6 @@ import {
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { withdrawMaterialAction } from '@/lib/actions/project.action';
-import { ProjectMaterialResponse } from '@/lib/api/api.type';
 import {
   WithdrawMaterialInput,
   withdrawMaterialSchema
@@ -25,16 +24,20 @@ import { Controller, useForm } from 'react-hook-form';
 
 export default function WithdrawMaterialDialog({
   projectId,
-  projectMaterial
+  materialId,
+  materialName,
+  unit,
+  stock
 }: {
   projectId: string;
-  projectMaterial: ProjectMaterialResponse;
+  materialId: string;
+  materialName: string;
+  unit: string;
+  stock: number;
 }) {
   const [open, setOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-
-  const remaining = projectMaterial.plannedQty - projectMaterial.usedQty;
 
   const { control, handleSubmit, reset } = useForm<WithdrawMaterialInput>({
     resolver: zodResolver(withdrawMaterialSchema),
@@ -44,11 +47,7 @@ export default function WithdrawMaterialDialog({
   const onSubmit = (data: WithdrawMaterialInput) => {
     setErrorMessage(null);
     startTransition(async () => {
-      const result = await withdrawMaterialAction(
-        projectId,
-        projectMaterial.materialId,
-        data
-      );
+      const result = await withdrawMaterialAction(projectId, materialId, data);
       if (result?.success === false) {
         setErrorMessage(result.message);
         return;
@@ -71,7 +70,7 @@ export default function WithdrawMaterialDialog({
           <Button
             variant="outline"
             size="sm"
-            disabled={remaining <= 0}
+            disabled={stock <= 0}
             aria-label="เบิกวัสดุ"
           />
         }
@@ -81,9 +80,9 @@ export default function WithdrawMaterialDialog({
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>เบิกวัสดุ: {projectMaterial.materialName}</DialogTitle>
+          <DialogTitle>เบิกวัสดุ: {materialName}</DialogTitle>
           <DialogDescription>
-            เหลือให้เบิกได้อีก {remaining} {projectMaterial.unit}
+            คงเหลือในสต็อก {stock} {unit}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -94,11 +93,11 @@ export default function WithdrawMaterialDialog({
               render={({ field, fieldState }) => (
                 <Field className="gap-1" data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor={field.name}>
-                    จำนวนที่ต้องการเบิก ({projectMaterial.unit})
+                    จำนวนที่ต้องการเบิก ({unit})
                   </FieldLabel>
                   <Input
                     type="number"
-                    max={remaining}
+                    max={stock}
                     id={field.name}
                     {...field}
                     onChange={(e) => field.onChange(e.target.valueAsNumber)}

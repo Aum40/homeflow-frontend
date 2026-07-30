@@ -11,7 +11,8 @@ import {
   DialogTrigger
 } from '@/components/ui/dialog';
 import { uploadAvatar } from '@/lib/actions/user.action';
-import { Camera } from 'lucide-react';
+import { checkUploadSize } from '@/lib/utils';
+import { Camera, Loader2 } from 'lucide-react';
 import { useRef, useState, useTransition } from 'react';
 
 type AvatarUploadDialogProps = {
@@ -22,17 +23,25 @@ export default function AvatarUploadDialog({
   avatarUrl
 }: AvatarUploadDialogProps) {
   const fileInputEl = useRef<HTMLInputElement | null>(null);
+  const [open, setOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const [isPending, startTransition] = useTransition();
 
   const imageUrl = file ? URL.createObjectURL(file) : avatarUrl;
 
   const handleClickSave = () => {
+    if (!file) return;
+    setErrorMessage(null);
     startTransition(async () => {
-      if (file) {
-        await uploadAvatar(file);
+      const result = await uploadAvatar(file);
+      if (result?.success === false) {
+        setErrorMessage(result.message);
+        return;
       }
+      setOpen(false);
+      setFile(null);
     });
   };
 
@@ -40,18 +49,30 @@ export default function AvatarUploadDialog({
     <>
       <input
         type="file"
+        accept="image/*"
         className="hidden"
         ref={fileInputEl}
         onChange={(e) => {
-          if (e.target.files) {
-            setFile(e.target.files[0]);
+          const picked = e.target.files?.[0];
+          if (!picked) return;
+          const sizeError = checkUploadSize(picked);
+          if (sizeError) {
+            setErrorMessage(sizeError);
+            e.target.value = '';
+            return;
           }
+          setErrorMessage(null);
+          setFile(picked);
         }}
       />
       <Dialog
-        onOpenChange={(current) => {
-          if (!current) {
+        open={open}
+        onOpenChange={(next) => {
+          if (isPending) return;
+          setOpen(next);
+          if (!next) {
             setFile(null);
+            setErrorMessage(null);
           }
         }}
       >
@@ -80,6 +101,12 @@ export default function AvatarUploadDialog({
             </Avatar>
           </div>
 
+          {errorMessage && (
+            <p className="text-center text-sm text-destructive">
+              {errorMessage}
+            </p>
+          )}
+
           <DialogFooter>
             <div className="flex-1">
               <Button
@@ -98,7 +125,8 @@ export default function AvatarUploadDialog({
                   onClick={handleClickSave}
                   disabled={isPending}
                 >
-                  Save
+                  {isPending && <Loader2 className="mr-1 size-4 animate-spin" />}
+                  {isPending ? 'Saving...' : 'Save'}
                 </Button>
               </div>
             )}

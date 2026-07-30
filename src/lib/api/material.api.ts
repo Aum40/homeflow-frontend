@@ -32,5 +32,14 @@ export const MaterialApi = {
     return authFetch<{ message: string }>(`/materials/${materialId}`, {
       method: 'DELETE'
     });
+  },
+
+  async uploadImage(materialId: string, file: File) {
+    const formData = new FormData();
+    formData.append('image', file);
+    return authFetch<MaterialResponse>(`/materials/${materialId}/image`, {
+      method: 'PATCH',
+      body: formData
+    });
   }
 };

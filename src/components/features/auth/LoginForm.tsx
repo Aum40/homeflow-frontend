@@ -6,7 +6,7 @@ import {
   Field,
   FieldError,
   FieldGroup,
-  FieldLabel
+  FieldLabel,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { loginAction } from '@/lib/actions/auth.action';
@@ -22,13 +22,13 @@ export default function LoginForm() {
     control,
     handleSubmit,
     setError,
-    formState: { errors }
+    formState: { errors },
   } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: '',
-      password: ''
-    }
+      password: '',
+    },
   });
 
   const [isPending, startTransition] = useTransition();
@@ -44,12 +44,12 @@ export default function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <FieldGroup className="gap-6">
+      <FieldGroup className='gap-6'>
         {/* Alert error message */}
         {errors.root && (
           <Alert
-            variant="destructive"
-            className="border-destructive bg-destructive/15"
+            variant='destructive'
+            className='border-destructive bg-destructive/15'
           >
             <AlertCircle />
             <AlertTitle>{errors.root.message}</AlertTitle>
@@ -59,21 +59,19 @@ export default function LoginForm() {
         {/* Email address */}
         <Controller
           control={control}
-          name="email"
+          name='email'
           render={({ field, fieldState }) => (
-            <Field className="gap-2" data-invalid={fieldState.invalid}>
+            <Field className='gap-2' data-invalid={fieldState.invalid}>
               <FieldLabel
                 htmlFor={field.name}
-                className="flex items-center gap-2 text-on-surface"
+                className='flex items-center gap-2 text-on-surface'
               >
-                <span className="material-symbols-outlined text-sm">
-                  mail
-                </span>
+                <span className='material-symbols-outlined text-sm'>mail</span>
                 อีเมล
               </FieldLabel>
               <Input
-                type="email"
-                placeholder="example@skyline.com"
+                type='email'
+                placeholder='example@skyline.com'
                 id={field.name}
                 {...field}
                 aria-invalid={fieldState.invalid}
@@ -86,43 +84,43 @@ export default function LoginForm() {
         {/* Password */}
         <Controller
           control={control}
-          name="password"
+          name='password'
           render={({ field, fieldState }) => (
-            <Field className="gap-2" data-invalid={fieldState.invalid}>
-              <div className="flex items-center justify-between">
+            <Field className='gap-2' data-invalid={fieldState.invalid}>
+              <div className='flex items-center justify-between'>
                 <FieldLabel
                   htmlFor={field.name}
-                  className="flex items-center gap-2 text-on-surface"
+                  className='flex items-center gap-2 text-on-surface'
                 >
-                  <span className="material-symbols-outlined text-sm">
+                  <span className='material-symbols-outlined text-sm'>
                     lock
                   </span>
                   รหัสผ่าน
                 </FieldLabel>
-                <span className="text-label-sm text-sm text-secondary">
+                <span className='text-label-sm text-sm text-secondary'>
                   ลืมรหัสผ่าน?
                 </span>
               </div>
-              <div className="relative">
+              <div className='relative'>
                 <Input
-                  placeholder="••••••••"
+                  placeholder=''
                   type={showPassword ? 'text' : 'password'}
                   id={field.name}
                   {...field}
                   aria-invalid={fieldState.invalid}
-                  className="pr-10"
+                  className='pr-10'
                 />
                 <button
-                  type="button"
+                  type='button'
                   tabIndex={-1}
                   onClick={() => setShowPassword((v) => !v)}
                   aria-label={showPassword ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน'}
-                  className="absolute top-1/2 right-2.5 -translate-y-1/2 text-outline hover:text-on-surface"
+                  className='absolute top-1/2 right-2.5 -translate-y-1/2 text-outline hover:text-on-surface'
                 >
                   {showPassword ? (
-                    <EyeOff className="size-4" />
+                    <EyeOff className='size-4' />
                   ) : (
-                    <Eye className="size-4" />
+                    <Eye className='size-4' />
                   )}
                 </button>
               </div>
@@ -132,15 +130,15 @@ export default function LoginForm() {
         />
 
         {/* Remember me */}
-        <div className="ml-1 flex items-center gap-2">
+        <div className='ml-1 flex items-center gap-2'>
           <input
-            id="remember"
-            type="checkbox"
-            className="size-4 rounded border-outline text-primary focus:ring-primary"
+            id='remember'
+            type='checkbox'
+            className='size-4 rounded border-outline text-primary focus:ring-primary'
           />
           <label
-            htmlFor="remember"
-            className="cursor-pointer text-sm text-on-surface-variant"
+            htmlFor='remember'
+            className='cursor-pointer text-sm text-on-surface-variant'
           >
             จดจำตัวฉันไว้ในเครื่องนี้
           </label>
@@ -149,8 +147,8 @@ export default function LoginForm() {
         {/* Submit button */}
         <Field>
           <Button
-            type="submit"
-            className="h-auto rounded-lg py-4 text-base font-semibold"
+            type='submit'
+            className='h-auto rounded-lg py-4 text-base font-semibold'
             disabled={isPending}
           >
             {isPending ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}

@@ -1,135 +1,136 @@
-'use client';
-
-import { Alert, AlertTitle } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { removeProjectMaterialAction } from '@/lib/actions/project.action';
-import { ProjectMaterialResponse } from '@/lib/api/api.type';
-import { AlertCircle, Trash2 } from 'lucide-react';
-import { useState, useTransition } from 'react';
-import EditProjectMaterialDialog from './EditProjectMaterialDialog';
+import ImageWithPlaceholder from '@/components/shared/ImageWithPlaceholder';
+import { MaterialResponse, ProjectMaterialResponse } from '@/lib/api/api.type';
 import { formatCurrency } from './ProjectCard';
 import WithdrawMaterialDialog from './WithdrawMaterialDialog';
+
+const LOW_STOCK_THRESHOLD = 20;
+
+type MaterialRow = {
+  materialId: string;
+  name: string;
+  unit: string;
+  imageUrl: string | null;
+  price: string | null;
+  stock: number | null;
+  usedQty: number;
+};
 
 export default function ProjectMaterialsTable({
   projectId,
   materials,
+  catalog,
   isManager
 }: {
   projectId: string;
   materials: ProjectMaterialResponse[];
+  catalog: MaterialResponse[];
   isManager: boolean;
 }) {
-  const [isPending, startTransition] = useTransition();
-  const [error, setError] = useState<string | null>(null);
-  const [pendingId, setPendingId] = useState<string | null>(null);
+  const usedQtyByMaterialId = new Map(
+    materials.map((material) => [material.materialId, material.usedQty])
+  );
 
-  const handleRemove = (projectMaterial: ProjectMaterialResponse) => {
-    if (
-      !confirm(
-        `ต้องการนำ "${projectMaterial.materialName}" ออกจากแผนวัสดุใช่หรือไม่?`
-      )
-    )
-      return;
+  const rows: MaterialRow[] = isManager
+    ? catalog.map((material) => ({
+        materialId: material.id,
+        name: material.name,
+        unit: material.unit,
+        imageUrl: material.imageUrl,
+        price: material.price,
+        stock: material.stock,
+        usedQty: usedQtyByMaterialId.get(material.id) ?? 0
+      }))
+    : materials.map((material) => ({
+        materialId: material.materialId,
+        name: material.materialName,
+        unit: material.unit,
+        imageUrl: material.imageUrl,
+        price: null,
+        stock: null,
+        usedQty: material.usedQty
+      }));
 
-    setPendingId(projectMaterial.materialId);
-    startTransition(async () => {
-      setError(null);
-      const result = await removeProjectMaterialAction(
-        projectId,
-        projectMaterial.materialId
-      );
-      if (result?.success === false) {
-        setError(result.message);
-      }
-      setPendingId(null);
-    });
-  };
-
-  if (materials.length === 0) {
+  if (rows.length === 0) {
     return (
       <p className="text-sm text-on-surface-variant">
-        ยังไม่มีวัสดุที่วางแผนไว้สำหรับโครงการนี้
+        {isManager
+          ? 'ยังไม่มีวัสดุในคลัง'
+          : 'ยังไม่มีวัสดุที่ใช้ในโครงการนี้'}
       </p>
     );
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      {error && (
-        <Alert
-          variant="destructive"
-          className="border-destructive bg-destructive/15"
-        >
-          <AlertCircle />
-          <AlertTitle>{error}</AlertTitle>
-        </Alert>
-      )}
-
-      <div className="overflow-x-auto rounded-lg border border-border">
-        <table className="w-full min-w-[720px] text-left text-sm">
-          <thead className="bg-muted text-muted-foreground">
-            <tr>
-              <th className="px-4 py-3 font-medium">วัสดุ</th>
-              <th className="px-4 py-3 font-medium">วางแผน</th>
-              <th className="px-4 py-3 font-medium">เบิกไปแล้ว</th>
-              <th className="px-4 py-3 font-medium">คงเหลือ</th>
+    <div className="overflow-x-auto rounded-lg border border-border">
+      <table className="w-full min-w-[640px] text-left text-sm">
+        <thead className="bg-muted text-muted-foreground">
+          <tr>
+            <th className="px-4 py-3 font-medium" />
+            <th className="px-4 py-3 font-medium">วัสดุ</th>
+            <th className="px-4 py-3 font-medium">เบิกไปแล้ว (โครงการนี้)</th>
+            {isManager && (
               <th className="px-4 py-3 font-medium">ราคา/หน่วย</th>
-              {isManager && <th className="px-4 py-3 font-medium" />}
-            </tr>
-          </thead>
-          <tbody>
-            {materials.map((material) => {
-              const remaining = material.plannedQty - material.usedQty;
-              const rowPending =
-                isPending && pendingId === material.materialId;
+            )}
+            {isManager && (
+              <th className="px-4 py-3 font-medium">คงเหลือในคลัง</th>
+            )}
+            {isManager && <th className="px-4 py-3 font-medium" />}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => {
+            const lowStock = row.stock !== null && row.stock <= LOW_STOCK_THRESHOLD;
 
-              return (
-                <tr
-                  key={material.id}
-                  className="border-t border-border last:border-b-0"
-                >
-                  <td className="px-4 py-3">{material.materialName}</td>
-                  <td className="px-4 py-3">
-                    {material.plannedQty} {material.unit}
-                  </td>
-                  <td className="px-4 py-3">
-                    {material.usedQty} {material.unit}
-                  </td>
-                  <td className="px-4 py-3">
-                    {remaining} {material.unit}
-                  </td>
+            return (
+              <tr
+                key={row.materialId}
+                className="border-t border-border last:border-b-0"
+              >
+                <td className="px-4 py-3">
+                  <ImageWithPlaceholder
+                    src={row.imageUrl}
+                    alt={row.name}
+                    className="size-20 shrink-0 rounded-md border border-border"
+                  />
+                </td>
+                <td className="px-4 py-3">{row.name}</td>
+                <td className="px-4 py-3">
+                  {row.usedQty} {row.unit}
+                </td>
+                {isManager && (
                   <td className="px-4 py-3 text-muted-foreground">
-                    {formatCurrency(material.plannedUnitPrice)}
+                    {formatCurrency(row.price!)}
                   </td>
-                  {isManager && (
-                    <td className="px-4 py-3">
-                      <div className="flex items-center justify-end gap-1">
-                        <WithdrawMaterialDialog
-                          projectId={projectId}
-                          projectMaterial={material}
-                        />
-                        <EditProjectMaterialDialog
-                          projectId={projectId}
-                          projectMaterial={material}
-                        />
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          disabled={rowPending || material.usedQty > 0}
-                          aria-label="นำวัสดุออก"
-                          onClick={() => handleRemove(material)}
-                        >
-                          <Trash2 className="size-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </td>
-                  )}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+                )}
+                {isManager && (
+                  <td className="px-4 py-3">
+                    <span
+                      className={
+                        lowStock
+                          ? 'text-xs font-semibold text-destructive'
+                          : ''
+                      }
+                    >
+                      {row.stock} {row.unit}
+                    </span>
+                  </td>
+                )}
+                {isManager && (
+                  <td className="px-4 py-3 text-right">
+                    <WithdrawMaterialDialog
+                      projectId={projectId}
+                      materialId={row.materialId}
+                      materialName={row.name}
+                      unit={row.unit}
+                      stock={row.stock!}
+                    />
+                  </td>
+                )}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }

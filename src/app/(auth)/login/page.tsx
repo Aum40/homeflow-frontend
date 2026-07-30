@@ -53,7 +53,6 @@ export default function LoginPage() {
         <div className='flex w-full max-w-md flex-col gap-8 rounded-xl p-10 shadow-[0_10px_25px_-5px_rgba(48,101,118,0.12)]'>
           {/* Brand identity */}
           <div className='mb-6 flex flex-col items-center text-center'>
-            <img src='' alt='' />
             <h2 className='text-2xl font-bold text-primary'>ยินดีต้อนรับ</h2>
             <p className='mt-2 text-base text-on-surface-variant'>
               เข้าสู่ระบบ Homeflow เพื่อจัดการโครงการของคุณ

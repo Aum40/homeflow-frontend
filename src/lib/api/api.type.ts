@@ -24,15 +24,31 @@ export type ProjectStatus =
   | 'COMPLETED'
   | 'CANCELLED';
 
+export type HouseDesignResponse = {
+  id: string;
+  name: string;
+  description: string | null;
+  imageUrl: string | null;
+  basePrice: string;
+  steps: string[];
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type ProjectResponse = {
   id: string;
   customerId: string;
   customerName: string;
   projectManagerId: string | null;
   projectManagerName: string | null;
+  houseDesignId: string | null;
+  houseDesignImageUrl: string | null;
   projectName: string;
+  imageUrl: string | null;
   houseType: string;
   location: string;
+  latitude: string | null;
+  longitude: string | null;
   estimatedBudget: string;
   actualCost: string;
   status: ProjectStatus;
@@ -41,6 +57,7 @@ export type ProjectResponse = {
   currentStepTitle: string | null;
   startDate: string | null;
   endDate: string | null;
+  completedAt: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -52,6 +69,7 @@ export type MaterialResponse = {
   unit: string;
   price: string;
   stock: number;
+  imageUrl: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -62,8 +80,7 @@ export type ProjectMaterialResponse = {
   materialId: string;
   materialName: string;
   unit: string;
-  plannedQty: number;
-  plannedUnitPrice: string;
+  imageUrl: string | null;
   usedQty: number;
   createdAt: string;
   updatedAt: string;
@@ -110,7 +127,7 @@ export type BudgetResponse = {
 export type DashboardResponse =
   | {
       role: 'ADMIN';
-      totalUsers: number;
+      totalProjectManagers: number;
       totalProjects: number;
       projectsByStatus: Record<string, number>;
       totalMaterials: number;

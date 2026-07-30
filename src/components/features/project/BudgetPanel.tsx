@@ -39,7 +39,7 @@ export default function BudgetPanel({ budget }: { budget: BudgetResponse }) {
             />
           </div>
           <p className="mt-1 text-xs text-on-surface-variant">
-            ใช้ไปแล้ว {budget.usagePercent}% ของงบประมาณ
+            ใช้ไปแล้ว {budget.usagePercent.toFixed(1)}% ของงบประมาณ
           </p>
         </div>
 

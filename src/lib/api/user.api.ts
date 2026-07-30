@@ -10,6 +10,10 @@ export const UserApi = {
     return authFetch<UserResponse[]>('/users');
   },
 
+  async getCustomers() {
+    return authFetch<UserResponse[]>('/users/customers');
+  },
+
   async updateRole(userId: string, role: UserRole) {
     return authFetch<UserResponse>(`/users/${userId}/role`, {
       method: 'PATCH',

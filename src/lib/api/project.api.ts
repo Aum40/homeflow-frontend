@@ -3,15 +3,16 @@ import {
   ChecklistItemResponse,
   MaterialWithdrawalResponse,
   ProjectMaterialResponse,
-  ProjectResponse
+  ProjectResponse,
+  ProjectStatus
 } from './api.type';
 import { authFetch } from './auth-fetch';
 import {
-  AddProjectMaterialInput,
   CreateChecklistItemInput,
   CreateProjectInput,
   UpdateChecklistItemInput,
-  UpdateProjectMaterialInput,
+  UpdateProjectDatesInput,
+  UpdateProjectInfoInput,
   WithdrawMaterialInput
 } from '../schemas/project.schema';
 
@@ -27,54 +28,53 @@ export const ProjectApi = {
     return authFetch<ProjectResponse[]>('/projects');
   },
 
-  async getPendingRequests() {
-    return authFetch<ProjectResponse[]>('/projects/requests');
-  },
-
   async getManaged() {
     return authFetch<ProjectResponse[]>('/projects/managed');
+  },
+
+  async getAll() {
+    return authFetch<ProjectResponse[]>('/projects/all');
   },
 
   async getById(projectId: string) {
     return authFetch<ProjectResponse>(`/projects/${projectId}`);
   },
 
-  async accept(projectId: string) {
-    return authFetch<ProjectResponse>(`/projects/${projectId}/accept`, {
-      method: 'PATCH'
+  async updateDates(projectId: string, data: UpdateProjectDatesInput) {
+    return authFetch<ProjectResponse>(`/projects/${projectId}`, {
+      method: 'PATCH',
+      body: data
     });
   },
 
-  // --- Material planning ---
-
-  async addMaterial(projectId: string, data: AddProjectMaterialInput) {
-    return authFetch<ProjectMaterialResponse>(
-      `/projects/${projectId}/materials`,
-      { method: 'POST', body: data }
-    );
+  async updateInfo(projectId: string, data: UpdateProjectInfoInput) {
+    return authFetch<ProjectResponse>(`/projects/${projectId}`, {
+      method: 'PATCH',
+      body: data
+    });
   },
+
+  async uploadImage(projectId: string, file: File) {
+    const formData = new FormData();
+    formData.append('image', file);
+    return authFetch<ProjectResponse>(`/projects/${projectId}/image`, {
+      method: 'PATCH',
+      body: formData
+    });
+  },
+
+  async close(projectId: string) {
+    return authFetch<ProjectResponse>(`/projects/${projectId}`, {
+      method: 'PATCH',
+      body: { status: 'COMPLETED' satisfies ProjectStatus }
+    });
+  },
+
+  // --- Material usage ---
 
   async getMaterials(projectId: string) {
     return authFetch<ProjectMaterialResponse[]>(
       `/projects/${projectId}/materials`
-    );
-  },
-
-  async updateMaterial(
-    projectId: string,
-    materialId: string,
-    data: UpdateProjectMaterialInput
-  ) {
-    return authFetch<ProjectMaterialResponse>(
-      `/projects/${projectId}/materials/${materialId}`,
-      { method: 'PATCH', body: data }
-    );
-  },
-
-  async removeMaterial(projectId: string, materialId: string) {
-    return authFetch<{ message: string }>(
-      `/projects/${projectId}/materials/${materialId}`,
-      { method: 'DELETE' }
     );
   },
 
@@ -91,9 +91,9 @@ export const ProjectApi = {
     );
   },
 
-  async getWithdrawals(projectId: string, materialId: string) {
+  async getWithdrawalHistory(projectId: string) {
     return authFetch<MaterialWithdrawalResponse[]>(
-      `/projects/${projectId}/materials/${materialId}/withdrawals`
+      `/projects/${projectId}/withdrawals`
     );
   },
 

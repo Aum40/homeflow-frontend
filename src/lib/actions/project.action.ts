@@ -6,16 +6,16 @@ import z from 'zod';
 import { ApiError } from '../api/api-error';
 import { ProjectApi } from '../api/project.api';
 import {
-  AddProjectMaterialInput,
-  addProjectMaterialSchema,
   CreateChecklistItemInput,
   createChecklistItemSchema,
   CreateProjectInput,
   createProjectSchema,
   UpdateChecklistItemInput,
   updateChecklistItemSchema,
-  UpdateProjectMaterialInput,
-  updateProjectMaterialSchema,
+  UpdateProjectDatesInput,
+  updateProjectDatesSchema,
+  UpdateProjectInfoInput,
+  updateProjectInfoSchema,
   WithdrawMaterialInput,
   withdrawMaterialSchema
 } from '../schemas/project.schema';
@@ -50,11 +50,51 @@ export async function createProjectAction(
   redirect('/');
 }
 
-export async function acceptProjectAction(
-  projectId: string
+export async function updateProjectDatesAction(
+  projectId: string,
+  input: UpdateProjectDatesInput
 ): Promise<ErrorActionResult | void> {
+  const parsed = updateProjectDatesSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      success: false,
+      message: 'Validation failed',
+      errors: z.flattenError(parsed.error),
+      code: 'VALIDATION_ERROR'
+    };
+  }
+
   try {
-    await ProjectApi.accept(projectId);
+    await ProjectApi.updateDates(projectId, parsed.data);
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        success: false,
+        message: error.message,
+        code: 'API_ERROR'
+      };
+    }
+    throw error;
+  }
+  revalidatePath(`/projects/${projectId}`);
+}
+
+export async function updateProjectInfoAction(
+  projectId: string,
+  input: UpdateProjectInfoInput
+): Promise<ErrorActionResult | void> {
+  const parsed = updateProjectInfoSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      success: false,
+      message: 'Validation failed',
+      errors: z.flattenError(parsed.error),
+      code: 'VALIDATION_ERROR'
+    };
+  }
+
+  try {
+    await ProjectApi.updateInfo(projectId, parsed.data);
   } catch (error) {
     if (error instanceof ApiError) {
       return {
@@ -69,22 +109,12 @@ export async function acceptProjectAction(
   revalidatePath(`/projects/${projectId}`);
 }
 
-export async function addProjectMaterialAction(
+export async function uploadProjectImageAction(
   projectId: string,
-  input: AddProjectMaterialInput
+  file: File
 ): Promise<ErrorActionResult | void> {
-  const parsed = addProjectMaterialSchema.safeParse(input);
-  if (!parsed.success) {
-    return {
-      success: false,
-      message: 'Validation failed',
-      errors: z.flattenError(parsed.error),
-      code: 'VALIDATION_ERROR'
-    };
-  }
-
   try {
-    await ProjectApi.addMaterial(projectId, parsed.data);
+    await ProjectApi.uploadImage(projectId, file);
   } catch (error) {
     if (error instanceof ApiError) {
       return {
@@ -95,26 +125,15 @@ export async function addProjectMaterialAction(
     }
     throw error;
   }
+  revalidatePath('/');
   revalidatePath(`/projects/${projectId}`);
 }
 
-export async function updateProjectMaterialAction(
-  projectId: string,
-  materialId: string,
-  input: UpdateProjectMaterialInput
+export async function closeProjectAction(
+  projectId: string
 ): Promise<ErrorActionResult | void> {
-  const parsed = updateProjectMaterialSchema.safeParse(input);
-  if (!parsed.success) {
-    return {
-      success: false,
-      message: 'Validation failed',
-      errors: z.flattenError(parsed.error),
-      code: 'VALIDATION_ERROR'
-    };
-  }
-
   try {
-    await ProjectApi.updateMaterial(projectId, materialId, parsed.data);
+    await ProjectApi.close(projectId);
   } catch (error) {
     if (error instanceof ApiError) {
       return {
@@ -125,25 +144,7 @@ export async function updateProjectMaterialAction(
     }
     throw error;
   }
-  revalidatePath(`/projects/${projectId}`);
-}
-
-export async function removeProjectMaterialAction(
-  projectId: string,
-  materialId: string
-): Promise<ErrorActionResult | void> {
-  try {
-    await ProjectApi.removeMaterial(projectId, materialId);
-  } catch (error) {
-    if (error instanceof ApiError) {
-      return {
-        success: false,
-        message: error.message,
-        code: 'API_ERROR'
-      };
-    }
-    throw error;
-  }
+  revalidatePath('/');
   revalidatePath(`/projects/${projectId}`);
 }
 

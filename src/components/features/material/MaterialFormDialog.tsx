@@ -13,7 +13,8 @@ import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field
 import { Input } from '@/components/ui/input';
 import {
   createMaterialAction,
-  updateMaterialAction
+  updateMaterialAction,
+  uploadMaterialImageAction
 } from '@/lib/actions/material.action';
 import { MaterialResponse } from '@/lib/api/api.type';
 import {
@@ -21,9 +22,11 @@ import {
   createMaterialSchema
 } from '@/lib/schemas/material.schema';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Pencil, Plus } from 'lucide-react';
-import { useState, useTransition } from 'react';
+import { checkUploadSize } from '@/lib/utils';
+import { Camera, Pencil, Plus } from 'lucide-react';
+import { useRef, useState, useTransition } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import ImageWithPlaceholder from '@/components/shared/ImageWithPlaceholder';
 
 export default function MaterialFormDialog({
   material
@@ -33,7 +36,9 @@ export default function MaterialFormDialog({
   const isEdit = !!material;
   const [open, setOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [isPending, startTransition] = useTransition();
+  const fileInputEl = useRef<HTMLInputElement | null>(null);
 
   const { control, handleSubmit, reset } = useForm<CreateMaterialInput>({
     resolver: zodResolver(createMaterialSchema),
@@ -46,6 +51,10 @@ export default function MaterialFormDialog({
     }
   });
 
+  const previewSrc = imageFile
+    ? URL.createObjectURL(imageFile)
+    : (material?.imageUrl ?? null);
+
   const onSubmit = (data: CreateMaterialInput) => {
     setErrorMessage(null);
     startTransition(async () => {
@@ -53,13 +62,29 @@ export default function MaterialFormDialog({
         ? await updateMaterialAction(material.id, data)
         : await createMaterialAction(data);
 
-      if (result?.success === false) {
+      if (result && 'success' in result && result.success === false) {
         setErrorMessage(result.message);
         return;
       }
 
+      const materialId = isEdit ? material.id : (result as MaterialResponse).id;
+
+      if (imageFile) {
+        const uploadResult = await uploadMaterialImageAction(
+          materialId,
+          imageFile
+        );
+        if (uploadResult?.success === false) {
+          setErrorMessage(uploadResult.message);
+          return;
+        }
+      }
+
       setOpen(false);
-      if (!isEdit) reset();
+      if (!isEdit) {
+        reset();
+        setImageFile(null);
+      }
     });
   };
 
@@ -91,6 +116,42 @@ export default function MaterialFormDialog({
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
           <FieldGroup className="gap-4">
+            <div className="flex items-center gap-4">
+              <ImageWithPlaceholder
+                src={previewSrc}
+                alt="รูปวัสดุ"
+                className="size-28 shrink-0 rounded-lg border border-outline-variant"
+              />
+              <div>
+                <input
+                  ref={fileInputEl}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const sizeError = checkUploadSize(file);
+                    if (sizeError) {
+                      setErrorMessage(sizeError);
+                      e.target.value = '';
+                      return;
+                    }
+                    setErrorMessage(null);
+                    setImageFile(file);
+                  }}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileInputEl.current?.click()}
+                >
+                  <Camera className="mr-1 size-4" />
+                  เลือกรูปภาพ
+                </Button>
+              </div>
+            </div>
             <Controller
               control={control}
               name="name"
