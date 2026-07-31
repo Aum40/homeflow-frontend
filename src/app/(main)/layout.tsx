@@ -4,7 +4,7 @@ import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 
 export default async function MainLayout({
-  children
+  children,
 }: {
   children: React.ReactNode;
 }) {
@@ -17,15 +17,15 @@ export default async function MainLayout({
     firstName: session.user.firstName,
     lastName: session.user.lastName,
     role: session.user.role,
-    avatarUrl: session.user.avatarUrl
+    avatarUrl: session.user.avatarUrl,
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className='min-h-screen bg-background'>
       <AppSidebar user={user} />
-      <div className="lg:ml-64">
-        <AppHeader title="งานก่อสร้างของคุณ" user={user} />
-        <main className="max-w-350 p-gutter-mobile lg:p-gutter-desktop">
+      <div className='lg:ml-64'>
+        <AppHeader title='' user={user} />
+        <main className='max-w-350 p-gutter-mobile lg:p-gutter-desktop'>
           {children}
         </main>
       </div>

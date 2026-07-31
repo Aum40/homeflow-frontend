@@ -134,7 +134,7 @@ export type DashboardResponse =
       lowStockMaterials: number;
     }
   | {
-      role: 'PROJECT_MANAGER' | 'CUSTOMER';
+      role: 'PROJECT_MANAGER';
       totalProjects: number;
       projectsByStatus: Record<string, number>;
       totalEstimatedBudget: string;

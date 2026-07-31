@@ -138,7 +138,7 @@ export default function LocationMapPicker({
   return (
     <div>
       {!readOnly && onChange && <LocationSearchBox onSelect={onChange} />}
-      <div className="h-64 w-full overflow-hidden rounded-lg border border-outline-variant">
+      <div className="relative isolate h-64 w-full overflow-hidden rounded-lg border border-outline-variant">
         <MapContainer
           center={center}
           zoom={hasPosition ? 15 : 6}

@@ -2,9 +2,13 @@
 
 import z from 'zod';
 import {
+  ForgotPasswordInput,
+  forgotPasswordSchema,
   LoginInput,
   RegisterInput,
-  registerSchema
+  registerSchema,
+  ResetPasswordInput,
+  resetPasswordSchema
 } from '../schemas/auth.schema';
 import { ErrorActionResult } from './action.type';
 import { AuthApi } from '../api/auth.api';
@@ -63,4 +67,64 @@ export async function loginAction(
 
 export async function logoutAction(): Promise<void> {
   await signOut({ redirectTo: '/login' });
+}
+
+type ForgotPasswordResult = ErrorActionResult | { success: true };
+
+export async function forgotPasswordAction(
+  input: ForgotPasswordInput
+): Promise<ForgotPasswordResult> {
+  const parsed = forgotPasswordSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      success: false,
+      message: 'Validation failed',
+      errors: z.flattenError(parsed.error),
+      code: 'VALIDATION_ERROR'
+    };
+  }
+
+  try {
+    await AuthApi.forgotPassword(parsed.data);
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        success: false,
+        message: error.message,
+        code: 'API_ERROR'
+      };
+    }
+    throw error;
+  }
+
+  return { success: true };
+}
+
+export async function resetPasswordAction(
+  input: ResetPasswordInput
+): Promise<ErrorActionResult | void> {
+  const parsed = resetPasswordSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      success: false,
+      message: 'Validation failed',
+      errors: z.flattenError(parsed.error),
+      code: 'VALIDATION_ERROR'
+    };
+  }
+
+  try {
+    await AuthApi.resetPassword(parsed.data);
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        success: false,
+        message: error.message,
+        code: 'API_ERROR'
+      };
+    }
+    throw error;
+  }
+
+  redirect('/login');
 }

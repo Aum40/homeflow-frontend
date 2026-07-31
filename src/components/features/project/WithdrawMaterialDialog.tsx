@@ -100,6 +100,7 @@ export default function WithdrawMaterialDialog({
                     max={stock}
                     id={field.name}
                     {...field}
+                    value={Number.isNaN(field.value) ? '' : field.value}
                     onChange={(e) => field.onChange(e.target.valueAsNumber)}
                     aria-invalid={fieldState.invalid}
                   />

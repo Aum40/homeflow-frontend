@@ -54,14 +54,20 @@ function getNavItems(role?: string): NavItem[] {
     ];
   }
 
+  if (role === 'PROJECT_MANAGER') {
+    return [
+      { label: 'งานก่อสร้างของคุณ', href: '/', icon: Home, enabled: true },
+      {
+        label: 'แดชบอร์ด',
+        href: '/dashboard',
+        icon: LayoutDashboard,
+        enabled: true
+      }
+    ];
+  }
+
   return [
-    { label: 'งานก่อสร้างของคุณ', href: '/', icon: Home, enabled: true },
-    {
-      label: 'แดชบอร์ด',
-      href: '/dashboard',
-      icon: LayoutDashboard,
-      enabled: true
-    }
+    { label: 'งานก่อสร้างของคุณ', href: '/', icon: Home, enabled: true }
   ];
 }
 

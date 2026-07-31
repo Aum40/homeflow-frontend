@@ -13,6 +13,7 @@ import { loginAction } from '@/lib/actions/auth.action';
 import { LoginInput, loginSchema } from '@/lib/schemas/auth.schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertCircle, Eye, EyeOff } from 'lucide-react';
+import Link from 'next/link';
 import { useState, useTransition } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
@@ -97,9 +98,12 @@ export default function LoginForm() {
                   </span>
                   รหัสผ่าน
                 </FieldLabel>
-                <span className='text-label-sm text-sm text-secondary'>
-                  ลืมรหัสผ่าน?
-                </span>
+                <Button
+                  variant='link'
+                  className='h-auto p-0 text-label-sm text-sm text-secondary'
+                  nativeButton={false}
+                  render={<Link href='/forgot-password'>ลืมรหัสผ่าน?</Link>}
+                />
               </div>
               <div className='relative'>
                 <Input

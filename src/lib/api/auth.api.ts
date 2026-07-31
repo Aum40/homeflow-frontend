@@ -1,4 +1,9 @@
-import { LoginInput, RegisterInput } from '../schemas/auth.schema';
+import {
+  ForgotPasswordInput,
+  LoginInput,
+  RegisterInput,
+  ResetPasswordInput
+} from '../schemas/auth.schema';
 import { apiFetch } from './api-fetch';
 import { authFetch } from './auth-fetch';
 import { LoginResponse, UserResponse } from './api.type';
@@ -20,5 +25,19 @@ export const AuthApi = {
 
   getMe() {
     return authFetch<UserResponse>('/auth/me');
+  },
+
+  forgotPassword(data: ForgotPasswordInput) {
+    return apiFetch<void>('/auth/forgot-password', {
+      method: 'POST',
+      body: data
+    });
+  },
+
+  resetPassword(data: ResetPasswordInput) {
+    return apiFetch<void>('/auth/reset-password', {
+      method: 'POST',
+      body: data
+    });
   }
 };

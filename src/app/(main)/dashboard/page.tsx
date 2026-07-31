@@ -10,6 +10,7 @@ import { ProjectResponse, ProjectStatus } from '@/lib/api/api.type';
 import { auth } from '@/lib/auth';
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import {
   Boxes,
   ClipboardList,
@@ -290,6 +291,11 @@ function RecentProjectsList({
 
 export default async function DashboardPage() {
   const session = await auth();
+
+  if (session?.user?.role === 'CUSTOMER') {
+    redirect('/');
+  }
+
   const dashboard = await DashboardApi.get();
 
   if (dashboard.role === 'ADMIN') {
