@@ -17,7 +17,7 @@ export default function ProjectPhotosGallery({
 
   return (
     <section className='flex flex-col gap-4'>
-      <h3 className='text-lg font-bold text-on-surface'>ภาพถ่ายภายในงาน</h3>
+      <h3 className='text-lg font-bold text-on-surface'>ภาพถ่ายทั้งหมดในงาน</h3>
       {photos.length === 0 ? (
         <p className='text-sm text-on-surface-variant'>
           ยังไม่มีภาพถ่ายภายในงานสำหรับโครงการนี้

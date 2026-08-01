@@ -106,6 +106,7 @@ export async function updateProjectInfoAction(
     throw error;
   }
   revalidatePath('/');
+  revalidatePath('/progress');
   revalidatePath(`/projects/${projectId}`);
 }
 
@@ -126,6 +127,7 @@ export async function uploadProjectImageAction(
     throw error;
   }
   revalidatePath('/');
+  revalidatePath('/progress');
   revalidatePath(`/projects/${projectId}`);
 }
 
@@ -145,7 +147,28 @@ export async function closeProjectAction(
     throw error;
   }
   revalidatePath('/');
+  revalidatePath('/progress');
   revalidatePath(`/projects/${projectId}`);
+}
+
+export async function deleteProjectAction(
+  projectId: string
+): Promise<ErrorActionResult | void> {
+  try {
+    await ProjectApi.remove(projectId);
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        success: false,
+        message: error.message,
+        code: 'API_ERROR'
+      };
+    }
+    throw error;
+  }
+  revalidatePath('/');
+  revalidatePath('/progress');
+  redirect('/');
 }
 
 export async function withdrawMaterialAction(
@@ -194,6 +217,25 @@ export async function addChecklistItemAction(
 
   try {
     await ProjectApi.addChecklistItem(projectId, parsed.data);
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        success: false,
+        message: error.message,
+        code: 'API_ERROR'
+      };
+    }
+    throw error;
+  }
+  revalidatePath(`/projects/${projectId}`);
+}
+
+export async function reorderChecklistItemAction(
+  projectId: string,
+  itemIds: string[]
+): Promise<ErrorActionResult | void> {
+  try {
+    await ProjectApi.reorderChecklist(projectId, itemIds);
   } catch (error) {
     if (error instanceof ApiError) {
       return {

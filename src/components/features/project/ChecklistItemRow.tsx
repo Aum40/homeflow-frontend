@@ -8,8 +8,10 @@ import {
 } from '@/lib/actions/project.action';
 import { ChecklistItemResponse } from '@/lib/api/api.type';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
-import { checkUploadSize } from '@/lib/utils';
-import { ImagePlus, Loader2, Trash2 } from 'lucide-react';
+import { checkUploadSize, cn } from '@/lib/utils';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { GripVertical, ImagePlus, Loader2, Trash2 } from 'lucide-react';
 import { useRef, useState, useTransition } from 'react';
 import EditChecklistItemDialog from './EditChecklistItemDialog';
 import PhotoThumbnail from './PhotoThumbnail';
@@ -32,6 +34,20 @@ export default function ChecklistItemRow({
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const fileInputEl = useRef<HTMLInputElement | null>(null);
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({ id: item.id, disabled: !isManager });
+
+  const sortableStyle = {
+    transform: CSS.Transform.toString(transform),
+    transition
+  };
 
   const handleToggle = () => {
     setError(null);
@@ -68,8 +84,26 @@ export default function ChecklistItemRow({
   };
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-outline-variant bg-surface-container-low p-4">
+    <div
+      ref={setNodeRef}
+      style={sortableStyle}
+      className={cn(
+        'flex flex-col gap-3 rounded-xl border border-outline-variant bg-surface-container-low p-4',
+        isDragging && 'relative z-10 opacity-50 shadow-lg'
+      )}
+    >
       <div className="flex items-start justify-between gap-3">
+        {isManager && (
+          <button
+            type="button"
+            aria-label="ลากเพื่อจัดลำดับใหม่"
+            className="mt-1 shrink-0 cursor-grab touch-none text-outline hover:text-on-surface active:cursor-grabbing"
+            {...attributes}
+            {...listeners}
+          >
+            <GripVertical className="size-5" />
+          </button>
+        )}
         <label className="flex flex-1 cursor-pointer items-start gap-3">
           <input
             type="checkbox"

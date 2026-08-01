@@ -1,14 +1,16 @@
-import ProjectCard from '@/components/features/project/ProjectCard';
+import HouseDesignCatalogGrid from '@/components/features/house-design/HouseDesignCatalogGrid';
 import PmProjectsList from '@/components/features/project/PmProjectsList';
 import { Button } from '@/components/ui/button';
 import { auth } from '@/lib/auth';
+import { HouseDesignApi } from '@/lib/api/house-design.api';
 import { ProjectApi } from '@/lib/api/project.api';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
+// หน้านี้ใช้ร่วมกันหลาย role (PM เห็นรายการโครงการ, ลูกค้าเห็นแคตตาล็อก) จึงตั้งชื่อกลางๆ
 export const metadata: Metadata = {
-  title: 'Home',
+  title: 'Homeflow'
 };
 
 export const dynamic = 'force-dynamic';
@@ -49,31 +51,21 @@ export default async function HomePage() {
     );
   }
 
-  const projects = await ProjectApi.getMine();
+  const houseDesigns = await HouseDesignApi.getAll();
 
   return (
-    <div className='flex flex-col gap-4'>
+    <div className='flex flex-col gap-6'>
       <div>
-        <h2 className='text-xl font-bold text-on-background'>โครงการของคุณ</h2>
+        <h2 className='text-xl font-bold text-on-background'>
+          {session?.user?.firstName
+            ? `สวัสดี, ${session.user.firstName}`
+            : 'แคตตาล็อกแบบบ้าน'}
+        </h2>
         <p className='text-sm text-on-surface-variant'>
-          ทั้งหมด {projects.length} โครงการ
+          เลือกดูแบบบ้านที่เรารับสร้าง กดที่การ์ดเพื่อดูรายละเอียด
         </p>
       </div>
-      {projects.length === 0 ? (
-        <p className='text-sm text-on-surface-variant'>
-          คุณยังไม่มีโครงการ — ทีมงานจะสร้างโครงการให้เมื่อเริ่มดำเนินการ
-        </p>
-      ) : (
-        <div className='space-y-4'>
-          {projects.map((project) => (
-            <ProjectCard
-              key={project.id}
-              project={project}
-              viewerRole='CUSTOMER'
-            />
-          ))}
-        </div>
-      )}
+      <HouseDesignCatalogGrid houseDesigns={houseDesigns} />
     </div>
   );
 }

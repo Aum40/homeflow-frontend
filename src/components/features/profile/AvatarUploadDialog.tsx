@@ -8,7 +8,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger
+  DialogTrigger,
 } from '@/components/ui/dialog';
 import { uploadAvatar } from '@/lib/actions/user.action';
 import { checkUploadSize } from '@/lib/utils';
@@ -20,7 +20,7 @@ type AvatarUploadDialogProps = {
 };
 
 export default function AvatarUploadDialog({
-  avatarUrl
+  avatarUrl,
 }: AvatarUploadDialogProps) {
   const fileInputEl = useRef<HTMLInputElement | null>(null);
   const [open, setOpen] = useState(false);
@@ -48,9 +48,9 @@ export default function AvatarUploadDialog({
   return (
     <>
       <input
-        type="file"
-        accept="image/*"
-        className="hidden"
+        type='file'
+        accept='image/*'
+        className='hidden'
         ref={fileInputEl}
         onChange={(e) => {
           const picked = e.target.files?.[0];
@@ -80,52 +80,54 @@ export default function AvatarUploadDialog({
         <DialogTrigger
           render={
             <Button
-              variant="outline"
-              className="rounded-full size-9 shadow absolute bottom-3 right-2"
-              data-slot="dialog-trigger"
+              variant='outline'
+              className='rounded-full size-9 shadow absolute bottom-3 right-2'
+              data-slot='dialog-trigger'
             >
-              <Camera className="size-4" />
+              <Camera className='size-4' />
             </Button>
           }
         />
 
         {/* Content */}
-        <DialogContent className="sm:max-w-3xl">
+        <DialogContent className='sm:max-w-3xl'>
           <DialogHeader>
-            <DialogTitle>Edit profile picture</DialogTitle>
+            <DialogTitle>ตั้งค่ารูปภาพประจำตัว</DialogTitle>
           </DialogHeader>
 
-          <div className="flex justify-center">
-            <Avatar className="size-75 border">
-              <AvatarImage alt="User" src={imageUrl ?? '/user.svg'} />
+          <div className='flex justify-center'>
+            <Avatar className='size-75 border'>
+              <AvatarImage alt='User' src={imageUrl ?? '/user.svg'} />
             </Avatar>
           </div>
 
           {errorMessage && (
-            <p className="text-center text-sm text-destructive">
+            <p className='text-center text-sm text-destructive'>
               {errorMessage}
             </p>
           )}
 
           <DialogFooter>
-            <div className="flex-1">
+            <div className='flex-1'>
               <Button
-                variant="outline"
-                className="w-full"
+                variant='outline'
+                className='w-full'
                 onClick={() => fileInputEl.current?.click()}
                 disabled={isPending}
               >
-                Choose cover photo
+                เลือกรูปภาพประจำตัว
               </Button>
             </div>
             {file && (
-              <div className="flex-1">
+              <div className='flex-1'>
                 <Button
-                  className="w-full"
+                  className='w-full'
                   onClick={handleClickSave}
                   disabled={isPending}
                 >
-                  {isPending && <Loader2 className="mr-1 size-4 animate-spin" />}
+                  {isPending && (
+                    <Loader2 className='mr-1 size-4 animate-spin' />
+                  )}
                   {isPending ? 'Saving...' : 'Save'}
                 </Button>
               </div>

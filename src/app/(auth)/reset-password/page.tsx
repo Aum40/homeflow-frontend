@@ -1,5 +1,10 @@
 import ResetPasswordForm from '@/components/features/auth/ResetPasswordForm';
+import { Alert, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { AuthApi } from '@/lib/api/auth.api';
+import { AlertCircle } from 'lucide-react';
 import { Metadata } from 'next';
+import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'ตั้งรหัสผ่านใหม่'
@@ -11,6 +16,9 @@ export default async function ResetPasswordPage({
   searchParams: Promise<{ token?: string }>;
 }) {
   const { token } = await searchParams;
+  const isValid = token
+    ? (await AuthApi.verifyResetToken(token)).valid
+    : false;
 
   return (
     <div className="relative w-full max-w-md p-4">
@@ -27,7 +35,25 @@ export default async function ResetPasswordPage({
             </p>
           </div>
 
-          <ResetPasswordForm token={token} />
+          {isValid && token ? (
+            <ResetPasswordForm token={token} />
+          ) : (
+            <div className="flex flex-col gap-4">
+              <Alert
+                variant="destructive"
+                className="border-destructive bg-destructive/15"
+              >
+                <AlertCircle />
+                <AlertTitle>
+                  ลิงก์นี้หมดอายุหรือไม่ถูกต้องแล้ว กรุณาขอลิงก์ใหม่อีกครั้ง
+                </AlertTitle>
+              </Alert>
+              <Button
+                nativeButton={false}
+                render={<Link href="/forgot-password">ขอลิงก์ใหม่</Link>}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>

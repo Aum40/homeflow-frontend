@@ -3,16 +3,16 @@
 import dynamic from 'next/dynamic';
 
 const LocationMapPicker = dynamic(
-  () => import('./LocationMapPicker'),
+  () => import('@/components/features/project/LocationMapPicker'),
   { ssr: false }
 );
 
-export default function ProjectLocationMap({
+export default function ReadOnlyLocationMap({
   latitude,
   longitude
 }: {
-  latitude: number;
-  longitude: number;
+  latitude: number | null;
+  longitude: number | null;
 }) {
   return (
     <LocationMapPicker latitude={latitude} longitude={longitude} readOnly />

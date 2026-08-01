@@ -63,6 +63,12 @@ export const ProjectApi = {
     });
   },
 
+  async remove(projectId: string) {
+    return authFetch<{ message: string }>(`/projects/${projectId}`, {
+      method: 'DELETE'
+    });
+  },
+
   async close(projectId: string) {
     return authFetch<ProjectResponse>(`/projects/${projectId}`, {
       method: 'PATCH',
@@ -109,6 +115,13 @@ export const ProjectApi = {
   async getChecklist(projectId: string) {
     return authFetch<ChecklistItemResponse[]>(
       `/projects/${projectId}/checklist`
+    );
+  },
+
+  async reorderChecklist(projectId: string, itemIds: string[]) {
+    return authFetch<ChecklistItemResponse[]>(
+      `/projects/${projectId}/checklist/reorder`,
+      { method: 'PATCH', body: { itemIds } }
     );
   },
 

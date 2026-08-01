@@ -13,10 +13,11 @@ import {
   updateUserRoleAction,
   updateUserStatusAction
 } from '@/lib/actions/user.action';
+import { Input } from '@/components/ui/input';
 import { UserResponse, UserRole } from '@/lib/api/api.type';
-import { AlertCircle, Loader2 } from 'lucide-react';
+import { AlertCircle, Loader2, Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState, useTransition } from 'react';
+import { useMemo, useState, useTransition } from 'react';
 
 const ROLE_LABELS: Record<UserRole, string> = {
   ADMIN: 'Admin',
@@ -35,6 +36,18 @@ export default function UserTable({
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [pendingUserId, setPendingUserId] = useState<string | null>(null);
+  const [query, setQuery] = useState('');
+
+  const filteredUsers = useMemo(() => {
+    const keyword = query.trim().toLowerCase();
+    if (!keyword) return users;
+
+    return users.filter((user) =>
+      `${user.firstName} ${user.lastName} ${user.email}`
+        .toLowerCase()
+        .includes(keyword)
+    );
+  }, [users, query]);
 
   const handleRoleChange = (userId: string, role: UserRole) => {
     setPendingUserId(userId);
@@ -76,6 +89,18 @@ export default function UserTable({
         </Alert>
       )}
 
+      <div className="relative w-full sm:max-w-sm">
+        <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-outline" />
+        <Input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="ค้นหาจากชื่อ หรืออีเมล"
+          aria-label="ค้นหาผู้ใช้งาน"
+          className="pl-9"
+        />
+      </div>
+
       <div className="overflow-x-auto rounded-lg border border-border">
         <table className="w-full min-w-[720px] text-left text-sm">
           <thead className="bg-muted text-muted-foreground">
@@ -88,7 +113,7 @@ export default function UserTable({
             </tr>
           </thead>
           <tbody>
-            {users.map((user) => {
+            {filteredUsers.map((user) => {
               const isSelf = user.id === currentUserId;
               const rowPending = isPending && pendingUserId === user.id;
 
@@ -164,6 +189,18 @@ export default function UserTable({
                 </tr>
               );
             })}
+            {filteredUsers.length === 0 && (
+              <tr>
+                <td
+                  colSpan={5}
+                  className="px-4 py-6 text-center text-muted-foreground"
+                >
+                  {query.trim()
+                    ? `ไม่พบผู้ใช้งานที่ตรงกับ "${query.trim()}"`
+                    : 'ยังไม่มีผู้ใช้งานในระบบ'}
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

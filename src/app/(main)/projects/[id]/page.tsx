@@ -2,19 +2,23 @@ import ImageWithPlaceholder from '@/components/shared/ImageWithPlaceholder';
 import InlineEditableText from '@/components/shared/InlineEditableText';
 import BudgetPanel from '@/components/features/project/BudgetPanel';
 import CloseProjectButton from '@/components/features/project/CloseProjectButton';
+import DeleteProjectButton from '@/components/features/project/DeleteProjectButton';
 import EditableProjectLocationMap from '@/components/features/project/EditableProjectLocationMap';
 import EditProjectDatesDialog from '@/components/features/project/EditProjectDatesDialog';
-import ProjectLocationMap from '@/components/features/project/ProjectLocationMap';
+import ReadOnlyLocationMap from '@/components/shared/ReadOnlyLocationMap';
 import ProjectMaterialsSection from '@/components/features/project/ProjectMaterialsSection';
 import ProjectPhotosGallery from '@/components/features/project/ProjectPhotosGallery';
 import ProjectProgressRing from '@/components/features/project/ProjectProgressRing';
 import ProjectStagesCard from '@/components/features/project/ProjectStagesCard';
 import ProjectStatusBadge from '@/components/features/project/ProjectStatusBadge';
+import { Button } from '@/components/ui/button';
 import { ApiError } from '@/lib/api/api-error';
 import { updateProjectInfoAction } from '@/lib/actions/project.action';
 import { MaterialApi } from '@/lib/api/material.api';
 import { ProjectApi } from '@/lib/api/project.api';
 import { auth } from '@/lib/auth';
+import { ChevronLeft } from 'lucide-react';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 function formatDate(value: string) {
@@ -57,6 +61,8 @@ export default async function ProjectDetailPage({
     session?.user?.role === 'PROJECT_MANAGER' &&
     project.projectManagerId === session.user.id;
 
+  const isCustomerViewer = session?.user?.role === 'CUSTOMER';
+
   const canEditDates =
     isManager &&
     project.status !== 'COMPLETED' &&
@@ -88,6 +94,20 @@ export default async function ProjectDetailPage({
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
+      <Button
+        variant="ghost"
+        size="sm"
+        className="w-fit gap-1 px-2 text-on-surface-variant"
+        nativeButton={false}
+        render={
+          // ลูกค้ามาจากหน้าความคืบหน้า ส่วน PM มาจากรายการโครงการที่หน้าแรก
+          <Link href={isCustomerViewer ? '/progress' : '/'}>
+            <ChevronLeft className="size-4" />
+            กลับ
+          </Link>
+        }
+      />
+
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-4">
           <ImageWithPlaceholder
@@ -140,6 +160,12 @@ export default async function ProjectDetailPage({
               progressPercent={project.progressPercent}
             />
           )}
+          {isManager && (
+            <DeleteProjectButton
+              projectId={project.id}
+              projectName={project.projectName}
+            />
+          )}
         </div>
       </div>
 
@@ -156,7 +182,7 @@ export default async function ProjectDetailPage({
       ) : (
         project.latitude !== null &&
         project.longitude !== null && (
-          <ProjectLocationMap
+          <ReadOnlyLocationMap
             latitude={Number(project.latitude)}
             longitude={Number(project.longitude)}
           />

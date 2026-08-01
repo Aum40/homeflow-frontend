@@ -1,6 +1,8 @@
+import homeflowIcon from '@/app/icon.png';
 import LoginForm from '@/components/features/auth/LoginForm';
 import { Button } from '@/components/ui/button';
 import { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
@@ -53,6 +55,12 @@ export default function LoginPage() {
         <div className='flex w-full max-w-md flex-col gap-8 rounded-xl p-10 shadow-[0_10px_25px_-5px_rgba(48,101,118,0.12)]'>
           {/* Brand identity */}
           <div className='mb-6 flex flex-col items-center text-center'>
+            <Image
+              src={homeflowIcon}
+              alt='Homeflow'
+              className='mb-4 size-16 rounded-xl md:size-20'
+              priority
+            />
             <h2 className='text-2xl font-bold text-primary'>ยินดีต้อนรับ</h2>
             <p className='mt-2 text-base text-on-surface-variant'>
               เข้าสู่ระบบ Homeflow เพื่อจัดการโครงการของคุณ

@@ -39,5 +39,11 @@ export const AuthApi = {
       method: 'POST',
       body: data
     });
+  },
+
+  verifyResetToken(token: string) {
+    return apiFetch<{ valid: boolean }>(
+      `/auth/verify-reset-token?token=${encodeURIComponent(token)}`
+    );
   }
 };

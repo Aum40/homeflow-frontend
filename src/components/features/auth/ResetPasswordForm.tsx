@@ -20,7 +20,7 @@ import Link from 'next/link';
 import { useState, useTransition } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
-export default function ResetPasswordForm({ token }: { token?: string }) {
+export default function ResetPasswordForm({ token }: { token: string }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const {
@@ -30,7 +30,7 @@ export default function ResetPasswordForm({ token }: { token?: string }) {
     formState: { errors }
   } = useForm<ResetPasswordInput>({
     resolver: zodResolver(resetPasswordSchema),
-    defaultValues: { token: token ?? '', password: '', confirmPassword: '' }
+    defaultValues: { token, password: '', confirmPassword: '' }
   });
   const [isPending, startTransition] = useTransition();
 
@@ -42,18 +42,6 @@ export default function ResetPasswordForm({ token }: { token?: string }) {
       }
     });
   };
-
-  if (!token) {
-    return (
-      <Alert
-        variant="destructive"
-        className="border-destructive bg-destructive/15"
-      >
-        <AlertCircle />
-        <AlertTitle>ลิงก์นี้ไม่ถูกต้องหรือหมดอายุแล้ว กรุณาขอลิงก์ใหม่</AlertTitle>
-      </Alert>
-    );
-  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
