@@ -1,6 +1,6 @@
 import '@/styles/globals.css';
 import { cn } from '@/lib/utils';
-import { hankenGrotesk, jetBrainsMono } from '@/styles/font';
+import { notoSansThai } from '@/styles/font';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -21,8 +21,7 @@ export default function RootLayout({
       className={cn(
         'antialiased',
         'font-sans',
-        hankenGrotesk.variable,
-        jetBrainsMono.variable
+        notoSansThai.variable
       )}
     >
       <head>

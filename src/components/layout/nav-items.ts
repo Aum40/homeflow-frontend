@@ -1,6 +1,7 @@
 import {
   Boxes,
   Building2,
+  ClipboardList,
   HardHat,
   Home,
   House,
@@ -30,6 +31,15 @@ export function getNavItems(role?: string): NavItem[] {
         href: '/admin/manage-users',
         icon: Users,
         enabled: true
+      },
+      {
+        // ผู้ดูแลระบบดูโครงการได้ทั้งหมดแต่แก้ไขหรือลบไม่ได้ จึงใช้คำว่า "ดู"
+        label: 'ดูโครงการทั้งหมด',
+        shortLabel: 'โครงการ',
+        href: '/admin/projects',
+        icon: ClipboardList,
+        enabled: true,
+        matchPrefixes: ['/projects']
       },
       {
         label: 'จัดการวัสดุ',

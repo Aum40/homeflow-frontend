@@ -318,6 +318,26 @@ export async function removeChecklistItemAction(
   revalidatePath(`/projects/${projectId}`);
 }
 
+export async function removeChecklistItemPhotoAction(
+  projectId: string,
+  itemId: string,
+  photoId: string
+): Promise<ErrorActionResult | void> {
+  try {
+    await ProjectApi.removeChecklistItemPhoto(projectId, itemId, photoId);
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        success: false,
+        message: error.message,
+        code: 'API_ERROR'
+      };
+    }
+    throw error;
+  }
+  revalidatePath(`/projects/${projectId}`);
+}
+
 export async function uploadChecklistItemPhotosAction(
   projectId: string,
   itemId: string,

@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { registerAction } from '@/lib/actions/auth.action';
+import PasswordRequirements from './PasswordRequirements';
 import { RegisterInput, registerSchema } from '@/lib/schemas/auth.schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowRight, Eye, EyeOff } from 'lucide-react';
@@ -142,7 +143,7 @@ export default function RegisterForm() {
                 </FieldLabel>
                 <div className='relative'>
                   <Input
-                    placeholder='••••••••'
+                    placeholder=''
                     type={showPassword ? 'text' : 'password'}
                     id={field.name}
                     {...field}
@@ -163,6 +164,7 @@ export default function RegisterForm() {
                     )}
                   </button>
                 </div>
+                <PasswordRequirements value={field.value} className='mt-1' />
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
                 )}
@@ -186,7 +188,7 @@ export default function RegisterForm() {
                 </FieldLabel>
                 <div className='relative'>
                   <Input
-                    placeholder='••••••••'
+                    placeholder=''
                     type={showConfirmPassword ? 'text' : 'password'}
                     id={field.name}
                     {...field}

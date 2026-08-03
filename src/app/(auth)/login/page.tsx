@@ -28,23 +28,30 @@ export default function LoginPage() {
             มาตรฐานการสร้างบ้านแบบมืออาชีพ
           </h1>
           <p className='text-lg leading-relaxed opacity-80'>
-            Homeflow มอบความเชื่อถือและความโปร่งใสในการสร้างบ้านให้คุณ
-            พร้อมติดตามความคืบหน้าการก่อสร้างที่สมบูรณ์แบบ
+            Homeflow มอบความน่าเชื่อถือและความโปร่งใสให้กับคุณ
+            <br />
+            ซื้อบ้านสำเร็จรูปพร้อมติดตามความคืบหน้าในการสร้าง
           </p>
           <div className='mt-12 flex space-x-6'>
             <div className='flex flex-col items-center'>
               <span className='text-xl font-semibold'>100%</span>
-              <span className='font-mono text-xs opacity-70'>ความเชื่อถือ</span>
+              <span className='text-xs tracking-wider opacity-70'>
+                ความเชื่อถือ
+              </span>
             </div>
             <div className='h-12 w-px bg-on-primary/20' />
             <div className='flex flex-col items-center'>
               <span className='text-xl font-semibold'>100%</span>
-              <span className='font-mono text-xs opacity-70'>การติดตามงาน</span>
+              <span className='text-xs tracking-wider opacity-70'>
+                การติดตามงาน
+              </span>
             </div>
             <div className='h-12 w-px bg-on-primary/20' />
             <div className='flex flex-col items-center'>
               <span className='text-xl font-semibold'>Professional</span>
-              <span className='font-mono text-xs opacity-70'>มาตรฐานสากล</span>
+              <span className='text-xs tracking-wider opacity-70'>
+                มาตรฐานสากล
+              </span>
             </div>
           </div>
         </div>

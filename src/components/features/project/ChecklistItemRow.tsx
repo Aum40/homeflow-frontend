@@ -3,6 +3,7 @@
 import { Button } from '@/components/ui/button';
 import {
   removeChecklistItemAction,
+  removeChecklistItemPhotoAction,
   toggleChecklistItemAction,
   uploadChecklistItemPhotosAction
 } from '@/lib/actions/project.action';
@@ -11,7 +12,7 @@ import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import { checkUploadSize, cn } from '@/lib/utils';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, ImagePlus, Loader2, Trash2 } from 'lucide-react';
+import { GripVertical, ImagePlus, Loader2, Trash2, X } from 'lucide-react';
 import { useRef, useState, useTransition } from 'react';
 import EditChecklistItemDialog from './EditChecklistItemDialog';
 import PhotoThumbnail from './PhotoThumbnail';
@@ -169,13 +170,35 @@ export default function ChecklistItemRow({
 
       {(item.photos.length > 0 || isManager) && (
         <div className="flex flex-wrap gap-2">
-          {item.photos.map((photo) => (
-            <PhotoThumbnail
-              key={photo.id}
-              src={photo.imageUrl}
-              alt={item.title}
-              className="size-16 rounded-lg object-cover"
-            />
+          {item.photos.map((photo, index) => (
+            <div key={photo.id} className="group relative">
+              <PhotoThumbnail
+                src={photo.imageUrl}
+                alt={item.title}
+                className="size-16 rounded-lg object-cover"
+              />
+              {isManager && (
+                <ConfirmDialog
+                  triggerRender={
+                    <Button
+                      variant="destructive"
+                      size="icon-sm"
+                      aria-label={`ลบรูปภาพที่ ${index + 1}`}
+                      className="absolute -top-1.5 -right-1.5 size-5 rounded-full opacity-100 shadow-sm md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100"
+                    />
+                  }
+                  triggerContent={<X className="size-3" />}
+                  title="ยืนยันการลบรูปภาพ"
+                  description={`ต้องการลบรูปภาพนี้ออกจาก "${item.title}" ใช่หรือไม่?`}
+                  confirmLabel="ลบรูปภาพ"
+                  successMessage="ลบรูปภาพเรียบร้อยแล้ว"
+                  destructive
+                  onConfirm={() =>
+                    removeChecklistItemPhotoAction(projectId, item.id, photo.id)
+                  }
+                />
+              )}
+            </div>
           ))}
           {isManager && (
             <>

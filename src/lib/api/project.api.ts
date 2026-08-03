@@ -167,6 +167,17 @@ export const ProjectApi = {
     );
   },
 
+  async removeChecklistItemPhoto(
+    projectId: string,
+    itemId: string,
+    photoId: string
+  ) {
+    return authFetch<ChecklistItemResponse>(
+      `/projects/${projectId}/checklist/${itemId}/photos/${photoId}`,
+      { method: 'DELETE' }
+    );
+  },
+
   // --- Budget tracking ---
 
   async getBudget(projectId: string) {

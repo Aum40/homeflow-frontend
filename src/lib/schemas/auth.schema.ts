@@ -13,6 +13,10 @@ export const registerSchema = z
       .string('Password must be a string.')
       .min(8, 'Password must be at least 8 characters.')
       .regex(
+        /^[!-~]+$/,
+        'Password must use English letters, numbers, and symbols only.'
+      )
+      .regex(
         /(?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9])/,
         'Password must contain at least one lowercase letter, one uppercase letter, and one symbol.'
       ),

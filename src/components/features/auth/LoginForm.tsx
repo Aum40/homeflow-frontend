@@ -132,22 +132,6 @@ export default function LoginForm() {
             </Field>
           )}
         />
-
-        {/* Remember me */}
-        <div className='ml-1 flex items-center gap-2'>
-          <input
-            id='remember'
-            type='checkbox'
-            className='size-4 rounded border-outline text-primary focus:ring-primary'
-          />
-          <label
-            htmlFor='remember'
-            className='cursor-pointer text-sm text-on-surface-variant'
-          >
-            จดจำตัวฉันไว้ในเครื่องนี้
-          </label>
-        </div>
-
         {/* Submit button */}
         <Field>
           <Button
